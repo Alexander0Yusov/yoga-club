@@ -7,7 +7,7 @@ import Footer from "@/sections/Footer/Footer";
 
 import { LocaleT, i18nConfig } from "@/i18nConfig";
 import { dir } from "i18next";
-import TranslationsProvider from "@/components/TranslationsProvider/TranslationsProvider";
+// import TranslationsProvider from "@/components/TranslationsProvider";
 import initTranslations from "./i18n";
 
 const inter = Inter({ subsets: ["latin"] });

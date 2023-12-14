@@ -1,6 +1,8 @@
 import initTranslations from "@/app/[lang]/i18n";
 import LanguageChanger from "@/components/LanguageChanger/LanguageChanger";
-import TranslationsProvider from "@/components/TranslationsProvider/TranslationsProvider";
+import Logo from "@/components/Logo/Logo";
+import { TranslationsProvider } from "@/components/TranslationsProvider";
+import Link from "next/link";
 
 const i18nNamespaces = ["homePage"];
 
@@ -13,8 +15,11 @@ const Header = async ({ lang }: { lang: any }) => {
       locale={lang}
       resources={resources}
     >
-      <div className="flex justify-center border-[1px] border-orange-950 mb-2">
-        <h2> Header </h2>
+      <div className="flex justify-between border-[1px] border-orange-950 mb-2">
+        <Logo />
+        <Link href={`/${lang}`}>Home</Link>
+        <Link href={`/${lang}/events`}>To events</Link>
+        <Link href={`/${lang}/auth/login`}>Auth</Link>
         <LanguageChanger />
       </div>
     </TranslationsProvider>

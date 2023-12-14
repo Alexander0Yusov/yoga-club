@@ -12,8 +12,9 @@ export default async function Home({
   const { t } = await initTranslations(lang, ["homePage", "eventsPage"]);
 
   return (
-    <div className="border-[1px] border-orange-950 w-full flex justify-center mb-2">
-      <h1 className="ml-auto mr-auto">Home | {t("home")} </h1>
+    <div className="border-[1px] border-orange-950 w-full flex flex-col justify-center mb-2">
+      <h1 className="ml-auto mr-auto">Home Page</h1>
+      <h2 className="ml-auto mr-auto">{t("home")}</h2>
     </div>
   );
 }

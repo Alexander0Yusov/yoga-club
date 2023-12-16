@@ -9,6 +9,7 @@ import { LocaleT, i18nConfig } from "@/i18nConfig";
 import { dir } from "i18next";
 // import TranslationsProvider from "@/components/TranslationsProvider";
 import initTranslations from "./i18n";
+import MySessionProvider from "@/components/MySessionProvider/MySessionProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,12 +41,14 @@ export default async function RootLayout({
         resources={resources}
       > */}
       <body className={inter.className}>
-        <Header lang={lang} />
-        <main className="flex flex-col items-center justify-between">
-          {children}
-        </main>
-        <Footer />
-        <div id="modal" />
+        <MySessionProvider>
+          <Header lang={lang} />
+          <main className="flex flex-col items-center justify-between">
+            {children}
+          </main>
+          <Footer />
+          <div id="modal" />
+        </MySessionProvider>
       </body>
       {/* </TranslationsProvider> */}
     </html>

@@ -2,9 +2,9 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <div className="flex justify-center border-[1px] border-orange-950">
+    <footer className="flex justify-center items-center border-[1px] border-orange-950 h-[60px]">
       <h2>Footer</h2>
-    </div>
+    </footer>
   );
 };
 

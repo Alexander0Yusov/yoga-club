@@ -14,11 +14,11 @@ type f = {
 
 const handler = NextAuth({
   secret: process.env.SECRET_KEY,
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise as any),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID as any,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as any,
     }),
     CredentialsProvider({
       name: "Credentials",

@@ -10,7 +10,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 230, 230, 230;
+    /* для отладки серый ниже */
+    /* --foreground-rgb: 230, 230, 230; */
+    --foreground-rgb: grey;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
@@ -20,8 +22,6 @@ body {
   color: rgb(var(--foreground-rgb));
   background-color: gray;
   box-sizing: border-box;
-  /* для отладки серый ниже */
-  color: rgb(150, 150, 150);
 }
 
 button:disabled {

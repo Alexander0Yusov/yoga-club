@@ -21,7 +21,6 @@ const Header = ({ lang }: { lang: any }) => {
   }, []);
 
   const session = useSession();
-  console.log(session);
 
   return (
     <TranslationsProvider
@@ -36,10 +35,15 @@ const Header = ({ lang }: { lang: any }) => {
           <Link href={`/${lang}/events`}>To events</Link>
 
           {session.status === "authenticated" && (
-            <div className="flex gap-3 border-[1px] border-orange-950 ">
-              <p>hi, {session.data.user?.email}</p>
+            <div className="flex gap-3 border-[1px] border-orange-950 p-[1px]">
+              <Link
+                href={"/profile"}
+                className=" border-[1px] border-orange-950 "
+              >
+                Profile {session.data.user?.name?.split(" ")[0]}
+              </Link>
               <button
-                className="flex justify-center border-[1px] border-orange-950 "
+                className=" border-[1px] border-orange-950 "
                 onClick={() => signOut()}
               >
                 Logout
@@ -48,8 +52,8 @@ const Header = ({ lang }: { lang: any }) => {
           )}
           {session.status === "unauthenticated" && (
             <div className="flex gap-3 border-[1px] border-orange-950 ">
-              <Link href={`/${lang}/login`}>Login</Link>
-              <Link href={`/${lang}/register`}>Register</Link>
+              <Link href={`/${lang}/signin`}>Sign In</Link>
+              <Link href={`/${lang}/signup`}>Sign Up</Link>
             </div>
           )}
         </nav>

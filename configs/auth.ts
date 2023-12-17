@@ -7,6 +7,7 @@ import { User } from "@/mongoose/models/User";
 import type { AuthOptions, User as User_for_type } from "next-auth";
 
 export const authConfig: AuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,

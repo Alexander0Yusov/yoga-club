@@ -17,7 +17,7 @@ const SignupForm = ({ lang }: { lang: LocaleT }) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const res = await fetch("/api/register", {
+    const res = await fetch("/api/user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, name }),

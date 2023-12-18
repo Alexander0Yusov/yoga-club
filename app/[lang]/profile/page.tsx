@@ -1,3 +1,5 @@
+import AuthTrigger from "@/components/AuthTrigger/AuthTrigger";
+import ProfileForm from "@/components/ProfileForm/ProfileForm";
 import { authConfig } from "@/configs/auth";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
@@ -8,6 +10,7 @@ const Profile = async () => {
   return (
     <section className="flex flex-col justify-center items-center border-[1px] border-orange-950 py-[20px]">
       <h2>Profile</h2>
+      <AuthTrigger />
 
       <p>{session?.user?.name}</p>
       <p>{session?.user?.email}</p>
@@ -22,6 +25,7 @@ const Profile = async () => {
           />
         </div>
       )}
+      <ProfileForm />
     </section>
   );
 };

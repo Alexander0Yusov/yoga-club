@@ -14,10 +14,11 @@ const ProfileForm = () => {
     files && files.length > 0 && setImage(files[0]);
   };
 
+  // система тостифай 4/ 23 мин
+  // ресайз картинок по докам клаудинария
   const handlerSubmit = async (e: any) => {
     e.preventDefault();
 
-    //  const formData = new FormData(e.target);
     const formData = new FormData();
     if (name) {
       formData.append("name", name);
@@ -29,7 +30,6 @@ const ProfileForm = () => {
     const res = await fetch("/api/user", {
       method: "PATCH",
       body: formData,
-      // headers: { "Content-Type": "multipart/form-data" },
     });
 
     console.log("form with portrait send", res.ok);

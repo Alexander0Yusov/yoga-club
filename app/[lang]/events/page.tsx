@@ -1,11 +1,19 @@
+import ButtonCreateEvent from "@/components/ButtonCreateEvent/ButtonCreateEvent";
+import EventsGallery from "@/components/EventsGallery/EventsGallery";
 import React from "react";
 
-const Events = () => {
+const EventsPage = async () => {
   return (
-    <div className="w-full border-[1px] border-orange-950 text-center py-[20px]">
-      Events Page
-    </div>
+    <section>
+      <h1 className="w-full border-[1px] border-orange-950 text-center py-[20px]">
+        Events Page
+      </h1>
+
+      <ButtonCreateEvent />
+
+      <EventsGallery />
+    </section>
   );
 };
 
-export default Events;
+export default EventsPage;

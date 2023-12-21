@@ -15,6 +15,9 @@ const userSchema = new Schema(
       },
     },
     image: { type: String },
+    phone: { type: String },
+    isAdmin: { type: Boolean, required: true, default: false },
+    subscribedForNews: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

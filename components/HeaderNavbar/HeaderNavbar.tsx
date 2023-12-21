@@ -15,7 +15,7 @@ const HeaderNavbar = ({ lang }: { lang: LocaleT }) => {
       {session.status === "authenticated" && (
         <div className="flex gap-3 border-[1px] border-orange-950 p-[1px]">
           <Link href={"/profile"} className=" border-[1px] border-orange-950 ">
-            Profile {session.data.user?.name?.split(" ")[0]}
+            Profile {session.data.user?.email?.split("@")[0]}
           </Link>
           <button
             className=" border-[1px] border-orange-950 "

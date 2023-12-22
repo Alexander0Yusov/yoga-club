@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { UserInfo } from "@/mongoose/models/UserInfo";
 
 // GET
-export async function GET(req: Request) {
+export async function GET() {
   mongoose.connect(process.env.MONGO_URL as string);
 
   const session = await getServerSession(authConfig);

@@ -7,20 +7,20 @@ import { v2 as cloudinary } from "cloudinary";
 import { UserInfo } from "@/mongoose/models/UserInfo";
 
 // GET
-export async function GET(email: any) {
-  mongoose.connect(process.env.MONGO_URL as string);
+// export async function GET(email: any) {
+//   mongoose.connect(process.env.MONGO_URL as string);
 
-  if (email) {
-    const sessionData = User.findOne({ email });
-    const userInfoData = UserInfo.findOne({ owner: email });
+//   if (email) {
+//     const sessionData = User.findOne({ email });
+//     const userInfoData = UserInfo.findOne({ owner: email });
 
-    const [session, userInfo] = await Promise.all([sessionData, userInfoData]);
+//     const [session, userInfo] = await Promise.all([sessionData, userInfoData]);
 
-    return Response.json({ session, userInfo });
-  } else {
-    return Response.json(null);
-  }
-}
+//     return Response.json({ session, userInfo });
+//   } else {
+//     return Response.json(null);
+//   }
+// }
 
 // POST
 export async function POST(req: Request) {

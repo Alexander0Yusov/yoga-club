@@ -41,80 +41,112 @@ cloudinary.config({
 });
 
 export async function PATCH(req: Request) {
-  const formData = await req.formData();
-  mongoose.connect(process.env.MONGO_URL as string);
-
-  const nickname = formData.get("name");
-  const phone = formData.get("phone");
-  const portrait: any = formData.get("file");
+  let formData: any;
+  try {
+    formData = await req.formData();
+  } catch (error) {
+    return Response.json(error);
+  }
 
   const updateData: Record<string, string> = {};
+  updateData.nickname = formData.get("name") as string;
+  updateData.phone = formData.get("phone") as string;
 
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
+  const file: any = formData.get("file");
 
-  // if (nickname || phone || portrait) {
-  const { _id } = await User.findOne({ email });
-  if (_id) {
-    updateData.id = _id as string;
-    updateData.owner = email as string;
-  } else {
-    return Response.json(null);
+  let email: any;
+  try {
+    const session = await getServerSession(authConfig);
+    email = session?.user?.email;
+  } catch (error) {
+    return Response.json({ error, number: 1 });
   }
-  // }
 
-  // if (nickname) {
-  updateData.nickname = nickname as string;
-  // }
-  // if (phone) {
-  updateData.phone = phone as string;
-  // }
+  mongoose.connect(process.env.MONGO_URL as string);
 
-  if (portrait && portrait !== "no change") {
-    const imageArrayBuf = await portrait.arrayBuffer();
+  try {
+    const { _id } = await User.findOne({ email });
+    if (_id) {
+      updateData.id = _id as string;
+      updateData.owner = email as string;
+    } else {
+      return Response.json("User not found");
+    }
+  } catch (error) {
+    return Response.json({ error, number: 2 });
+  }
+
+  if (file && file !== "no change") {
+    let imageArrayBuf;
+    try {
+      imageArrayBuf = await file.arrayBuffer();
+    } catch (error) {
+      return Response.json({ error, number: 3 });
+    }
+
     const imageBuffer = Buffer.from(imageArrayBuf, "base64");
 
-    const result: any = await new Promise((resolve) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "yoga-club/avatars",
-            resource_type: "image",
-            use_filename: true,
-            public_id: updateData.id,
-            overwrite: true,
-          },
-          (error, uploadResult) => {
-            if (error) {
-              throw error;
+    let result: any;
+    try {
+      result = await new Promise((resolve) => {
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: "yoga-club/avatars",
+              resource_type: "image",
+              use_filename: true,
+              public_id: updateData.id,
+              overwrite: true,
+            },
+            (error, uploadResult) => {
+              if (error) {
+                throw error;
+              }
+              return resolve(uploadResult);
             }
-            return resolve(uploadResult);
-          }
-        )
-        .end(imageBuffer);
-    });
+          )
+          .end(imageBuffer);
+      });
+    } catch (error) {
+      return Response.json({ error, number: 4 });
+    }
 
-    delete updateData.id;
     updateData.portrait = result?.secure_url;
-  } else if (portrait !== "no change") {
+    delete updateData.id;
+  } else if (file === "no change") {
     updateData.portrait = "";
+    delete updateData.id;
   }
 
   if (Object.keys(updateData).length > 0) {
-    const isUserInfoExists = await UserInfo.findOne({
-      owner: updateData.owner,
-    });
-
-    if (isUserInfoExists) {
-      const userInfo = await UserInfo.findOneAndUpdate({ ...updateData });
-      const user = await User.findOne({ email });
-
-      return Response.json({
-        userInfo: { ...userInfo._doc, ...updateData, ...user._doc },
+    let isUserInfoExists;
+    try {
+      isUserInfoExists = await UserInfo.findOne({
+        owner: updateData.owner,
       });
-    } else {
-      const userInfo = await UserInfo.create({ ...updateData });
-      return Response.json(userInfo);
+    } catch (error) {
+      return Response.json({ error, number: 5 });
+    }
+
+    try {
+      if (isUserInfoExists) {
+        const userInfo = await UserInfo.findOneAndUpdate(
+          { owner: updateData.owner },
+          { ...updateData },
+          { new: true }
+        );
+        const user = await User.findOne({ email });
+
+        return Response.json({
+          userInfo: { ...userInfo._doc, ...updateData, ...user._doc },
+        });
+      } else {
+        const userInfo = await UserInfo.create({ ...updateData });
+
+        return Response.json({ userInfo });
+      }
+    } catch (error) {
+      return Response.json({ error, number: 6 });
     }
   }
 

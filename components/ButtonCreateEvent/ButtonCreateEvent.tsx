@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import ChevronDown from "../ChevronDown";
 import { useSession } from "next-auth/react";
+import DateTimePicker from "../DateTimePicker/DateTimePicker";
 
 const ButtonCreateEvent = () => {
   const [openForm, setOpenForm] = useState(false);
@@ -68,7 +69,7 @@ const ButtonCreateEvent = () => {
           <label>
             <p>Pick target time</p>
 
-            {/* <DateTimePicker /> */}
+            <DateTimePicker />
           </label>
 
           <label>

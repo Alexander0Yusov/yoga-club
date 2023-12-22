@@ -22,19 +22,31 @@ const UserBlock = ({}) => {
           }}
         >
           Admin mode
+          {/* статус админа можно хранить в контексте и переключать его как тему, сохранять в локалсторедж */}
         </button>
-        <Link
-          href="/profile/users"
-          className={path === "/users" ? "active" : ""}
-        >
-          Users
-        </Link>
-        <Link
-          href="/profile/statistics"
-          className={path === "/statistics" ? "active" : ""}
-        >
-          Statistics
-        </Link>
+
+        <div className="flex gap-2">
+          <Link
+            href="/profile/users"
+            className={path === "/users" ? "active" : ""}
+          >
+            Users
+          </Link>
+
+          <Link
+            href="/profile/statistics"
+            className={path === "/statistics" ? "active" : ""}
+          >
+            Statistics
+          </Link>
+
+          <Link
+            href="/profile/feedbacks"
+            className={path === "/feedbacks" ? "active" : ""}
+          >
+            Feedbacks
+          </Link>
+        </div>
       </div>
 
       <div className="border-[1px] border-orange-950 py-[20px]">

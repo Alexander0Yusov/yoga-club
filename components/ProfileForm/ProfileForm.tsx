@@ -9,7 +9,7 @@ const ProfileForm = () => {
     useRef(null);
 
   const [email, setEmail] = useState<string>("");
-  const [name, setName] = useState<string>("");
+  // const [name, setName] = useState<string>("");
   const [nickname, setNickname] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
 
@@ -44,14 +44,14 @@ const ProfileForm = () => {
         phone: phone_,
       } = await (await fetch("/api/userCurrent")).json();
 
-      setImage(image_);
-      setPortrait(portrait_);
-      setName(name_);
-      setPhone(phone_);
-      setEmail(email_);
+      setImage(image_ || "");
+      setPortrait(portrait_ || "");
+      // setName(name_);
+      setPhone(phone_ || "");
+      setEmail(email_ || "");
 
       if (!nickname_) {
-        setNickname(name_);
+        setNickname(name_ || "");
       } else {
         setNickname(nickname_);
       }
@@ -72,19 +72,14 @@ const ProfileForm = () => {
   const handlerSubmit = async (e: any) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target);
-    // if (nameForm) {
-    //   formData.append("name", nameForm);
-    // }
-    // if (imageForm) {
-    //   formData.append("image", imageForm);
-    // }
-    // if (phoneForm) {
-    //   formData.append("phone", phoneForm);
-    // }
+    const formData = new FormData();
 
-    if (!file) {
-      formData.delete("file");
+    formData.append("name", nickname);
+    formData.append("phone", phone);
+
+    if (file) {
+      formData.append("file", file);
+    } else {
       formData.append("file", "no change");
     }
 
@@ -137,6 +132,7 @@ const ProfileForm = () => {
           />
         </label>
 
+        {/* Ругается на этот элемент, компонент перевести на контролируемый */}
         <label className="flex flex-col border-[1px] border-lime-400 mb-2">
           Phone
           <input
@@ -154,7 +150,6 @@ const ProfileForm = () => {
             className=" appearance-none bg-gray-200  text-gray-900 "
             type="text"
             placeholder={email}
-            // value={email}
             disabled={true}
           />
         </label>
@@ -169,7 +164,7 @@ const ProfileForm = () => {
           Pick image
         </button>
 
-        {/* it is hidden */}
+        {/*Fileinput it is hidden */}
         <input
           name="file"
           className="hidden"

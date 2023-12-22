@@ -36,20 +36,25 @@ const ProfileForm = () => {
   useEffect(() => {
     const getData = async () => {
       const {
-        email,
-        portrait,
-        image: img,
-        name,
-        nickname,
-        phone,
+        email: email_,
+        portrait: portrait_,
+        image: image_,
+        name: name_,
+        nickname: nickname_,
+        phone: phone_,
       } = await (await fetch("/api/userCurrent")).json();
 
-      setImage(img);
-      setPortrait(portrait);
-      setNickname(nickname);
-      setName(name);
-      setPhone(phone);
-      setEmail(email);
+      setImage(image_);
+      setPortrait(portrait_);
+      setName(name_);
+      setPhone(phone_);
+      setEmail(email_);
+
+      if (!nickname_) {
+        setNickname(name_);
+      } else {
+        setNickname(nickname_);
+      }
     };
 
     getData();
@@ -92,9 +97,9 @@ const ProfileForm = () => {
 
     console.log(userInfo);
 
-    setPortrait(userInfo.portrait);
-    setNickname(userInfo.nickname);
-    setPhone(userInfo.phone);
+    setPortrait(userInfo?.portrait || "");
+    setNickname(userInfo?.nickname || "");
+    setPhone(userInfo?.phone || "");
     console.log("fetch end");
   };
 
@@ -127,7 +132,7 @@ const ProfileForm = () => {
             name="name"
             type="text"
             placeholder="Name"
-            value={nickname || name}
+            value={nickname}
             onChange={(e) => setNickname(e.target.value)}
           />
         </label>
@@ -137,7 +142,7 @@ const ProfileForm = () => {
           <input
             name="phone"
             type="text"
-            placeholder="Phone"
+            placeholder="+380991234567"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
@@ -146,9 +151,10 @@ const ProfileForm = () => {
         <label className="flex flex-col border-[1px] border-lime-400 mb-2">
           Email
           <input
-            className="text-gray-600"
+            className=" appearance-none bg-gray-200  text-gray-900 "
             type="text"
-            value={email}
+            placeholder={email}
+            // value={email}
             disabled={true}
           />
         </label>

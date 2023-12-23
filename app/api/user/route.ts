@@ -51,9 +51,7 @@ export async function PATCH(req: Request) {
   const updateData: Record<string, string> = {};
   updateData.nickname = formData.get("name") as string;
   updateData.phone = formData.get("phone") as string;
-
   const file: any = formData.get("file");
-  const nofile: any = formData.get("nofile");
 
   let email: any;
   try {
@@ -77,9 +75,7 @@ export async function PATCH(req: Request) {
     return Response.json({ error, number: 2 });
   }
 
-  if (!nofile) {
-    console.log(nofile);
-
+  if (file) {
     let imageArrayBuf;
     try {
       imageArrayBuf = await file.arrayBuffer();

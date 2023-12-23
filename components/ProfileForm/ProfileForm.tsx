@@ -69,11 +69,11 @@ const ProfileForm = () => {
   const handlerSubmit = async (e: any) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target);
-
-    if (file === null) {
-      formData.append("nofile", true as any);
-    }
+    // const formData = new FormData(e.target);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("nickname", nickname);
+    formData.append("phone", phone);
 
     try {
       const userInfo = await (

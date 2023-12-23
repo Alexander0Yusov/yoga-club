@@ -46,11 +46,11 @@ export const authConfig: AuthOptions = {
         const user = await User.findOne({ email: credentials.email });
 
         if (user && user.password === credentials.password) {
-          // const {
-          //   _doc: { password, ...restData },
-          // } = user;
+          const {
+            _doc: { ...restData },
+          } = user;
 
-          return user as User_for_type;
+          return restData as User_for_type;
         }
 
         return null;

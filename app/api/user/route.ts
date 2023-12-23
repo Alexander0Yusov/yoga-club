@@ -49,7 +49,7 @@ export async function PATCH(req: Request) {
   }
 
   const updateData: Record<string, string> = {};
-  updateData.nickname = formData.get("name") as string;
+  updateData.nickname = formData.get("nickname") as string;
   updateData.phone = formData.get("phone") as string;
   const file: any = formData.get("file");
   const isFileExists: boolean = formData.get("isFileExists");

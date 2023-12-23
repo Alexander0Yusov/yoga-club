@@ -129,19 +129,20 @@ export async function PATCH(req: Request) {
     }
 
     try {
+      const user = await User.findOne({ email });
+
       if (isUserInfoExists) {
         const userInfo = await UserInfo.findOneAndUpdate(
           { owner: updateData.owner },
           { ...updateData },
           { new: true }
         );
-        const user = await User.findOne({ email });
 
         return Response.json({ ...userInfo._doc, ...updateData, ...user._doc });
       } else {
         const userInfo = await UserInfo.create({ ...updateData });
 
-        return Response.json({ ...userInfo._doc });
+        return Response.json({ ...userInfo._doc, ...updateData, ...user._doc });
       }
     } catch (error) {
       return Response.json({ error, number: 6 });

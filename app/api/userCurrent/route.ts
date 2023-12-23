@@ -16,15 +16,15 @@ export async function GET() {
     const isUserInfoExists = await UserInfo.findOne({ owner: email });
 
     if (isUserInfoExists) {
-      const sessionData = User.findOne({ email });
-      const userInfoData = UserInfo.findOne({ owner: email });
+      const sessionDataPromise = User.findOne({ email });
+      const userInfoDataPromise = UserInfo.findOne({ owner: email });
 
-      const [session, userInfo] = await Promise.all([
-        sessionData,
-        userInfoData,
+      const [sessionData, userInfoData] = await Promise.all([
+        sessionDataPromise,
+        userInfoDataPromise,
       ]);
 
-      return Response.json({ ...userInfo._doc, ...session._doc });
+      return Response.json({ ...userInfoData._doc, ...sessionData._doc });
     } else {
       const sessionData = await User.findOne({ email });
 

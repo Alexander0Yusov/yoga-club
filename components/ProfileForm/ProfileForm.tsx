@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -9,7 +8,6 @@ const ProfileForm = () => {
     useRef(null);
 
   const [email, setEmail] = useState<string>("");
-  // const [name, setName] = useState<string>("");
   const [nickname, setNickname] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
 
@@ -46,7 +44,6 @@ const ProfileForm = () => {
 
       setImage(image_ || "");
       setPortrait(portrait_ || "");
-      // setName(name_);
       setPhone(phone_ || "");
       setEmail(email_ || "");
 
@@ -74,26 +71,26 @@ const ProfileForm = () => {
 
     const formData = new FormData(e.target);
 
-    if (!file) {
+    if (file === null) {
       formData.delete("file");
       formData.append("file", "no change");
     }
 
-    let userInfo;
     try {
-      userInfo = await (
+      const userInfo = await (
         await fetch("/api/user", {
           method: "PATCH",
           body: formData,
         })
       ).json();
+
+      console.log(userInfo);
+
+      setPortrait(userInfo?.portrait || "");
+      setNickname(userInfo?.nickname || "");
+      setPhone(userInfo?.phone || "");
     } catch (error) {}
 
-    console.log(userInfo);
-
-    setPortrait(userInfo?.portrait || "");
-    setNickname(userInfo?.nickname || "");
-    setPhone(userInfo?.phone || "");
     console.log("fetch end");
   };
 

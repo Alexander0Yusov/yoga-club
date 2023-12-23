@@ -69,14 +69,13 @@ const ProfileForm = () => {
   const handlerSubmit = async (e: any) => {
     e.preventDefault();
 
-    // const formData = new FormData(e.target);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("nickname", nickname);
-    formData.append("phone", phone);
+    const formData = new FormData(e.target);
 
     if (file) {
+      console.log(44, file);
+
       formData.append("isFileExists", true as any);
+      setFile(null);
     }
 
     try {
@@ -94,6 +93,7 @@ const ProfileForm = () => {
       setPhone(userInfo?.phone || "");
     } catch (error) {}
 
+    e.target.reset();
     console.log("fetch end");
   };
 
@@ -134,7 +134,7 @@ const ProfileForm = () => {
         <label className="flex flex-col border-[1px] border-lime-400 mb-2">
           Name
           <input
-            name="name"
+            name="nickname"
             type="text"
             placeholder="Name"
             value={nickname}

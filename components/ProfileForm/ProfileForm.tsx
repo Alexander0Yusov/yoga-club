@@ -75,6 +75,10 @@ const ProfileForm = () => {
     formData.append("nickname", nickname);
     formData.append("phone", phone);
 
+    if (file) {
+      formData.append("isFileExists", true as any);
+    }
+
     try {
       const userInfo = await (
         await fetch("/api/user", {

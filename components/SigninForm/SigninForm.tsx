@@ -17,26 +17,26 @@ const SigninForm = ({ lang }: { lang: LocaleT }) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
+    // const formData = new FormData(e.currentTarget);
 
     // await signIn("credentials", { email, password, callbackUrl: "/" });
-    const res = await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      redirect: false,
+    await signIn("Credentials", {
+      email,
+      password,
+      // redirect: false,
       callbackUrl: "/",
     });
 
     setIsLoading(false);
 
-    res?.ok && setFindUser(true);
-    res?.error && setError(true);
+    // res?.ok && setFindUser(true);
+    // res?.error && setError(true);
 
-    if (res && !res.error) {
-      router.push("/");
-    } else {
-      console.log(res, lang);
-    }
+    // if (res && !res.error) {
+    //   router.push("/");
+    // } else {
+    //   console.log(res, lang);
+    // }
   };
 
   return (

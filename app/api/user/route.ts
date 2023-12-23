@@ -137,13 +137,11 @@ export async function PATCH(req: Request) {
         );
         const user = await User.findOne({ email });
 
-        return Response.json({
-          userInfo: { ...userInfo._doc, ...updateData, ...user._doc },
-        });
+        return Response.json({ ...userInfo._doc, ...updateData, ...user._doc });
       } else {
         const userInfo = await UserInfo.create({ ...updateData });
 
-        return Response.json({ userInfo });
+        return Response.json({ ...userInfo._doc });
       }
     } catch (error) {
       return Response.json({ error, number: 6 });

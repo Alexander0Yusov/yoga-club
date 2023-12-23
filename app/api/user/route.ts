@@ -52,6 +52,7 @@ export async function PATCH(req: Request) {
   updateData.nickname = formData.get("name") as string;
   updateData.phone = formData.get("phone") as string;
   const file: any = formData.get("file");
+  const isFileExists: boolean = formData.get("isFileExists");
 
   let email: any;
   try {
@@ -75,8 +76,9 @@ export async function PATCH(req: Request) {
     return Response.json({ error, number: 2 });
   }
 
-  if (file) {
+  if (isFileExists) {
     let imageArrayBuf;
+
     try {
       imageArrayBuf = await file.arrayBuffer();
     } catch (error) {

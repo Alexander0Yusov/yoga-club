@@ -76,16 +76,50 @@ export async function PATCH(req: Request) {
     return Response.json({ error, number: 2 });
   }
 
+  // ======================================= 1
+  // const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+  // const uploadPreset = "YOUR_UPLOAD_PRESET";// ???
+  // const cloudinaryApiKey = CLOUDINARY_API_KEY;
+  // const cloudinaryApiSecret = CLOUDINARY_API_SECRET;
+
+  // const fd = new FormData();
+  // fd.append("file", file);
+  // fd.append("upload_preset", uploadPreset);
+
+  // fetch(cloudinaryUrl, {
+  //   method: "POST",
+  //   body: fd,
+  //   headers: {
+  //     Authorization: `Basic ${btoa(
+  //       `${cloudinaryApiKey}:${cloudinaryApiSecret}`
+  //     )}`,
+  //   },
+  // })
+  //   .then((response) => {
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! Status: ${response.status}`);
+  //     }
+  //     return response.json();
+  //   })
+  //   .then((data) => {
+  //     console.log("File uploaded successfully:", data);
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error uploading file to Cloudinary:", error);
+  //   });
+
+  // ========================================= 2
+
   if (isFileExists) {
     const obj: any = {};
 
-    // try {
-    obj.arrayBuffer_ = await file.arrayBuffer();
-    // } catch (error) {
-    //   return Response.json({ error, number: 3 });
-    // }
+    try {
+      obj.arrayBuffer_ = await file.arrayBuffer();
+    } catch (error) {
+      return Response.json({ error, number: 3 });
+    }
 
-    const imageBuffer = Buffer.from(obj.arrayBuffer_, "base64");
+    const imageBuffer = Buffer.from(obj.arrayBuffer_);
 
     try {
       const result: any = await new Promise((resolve) => {
@@ -114,6 +148,8 @@ export async function PATCH(req: Request) {
       return Response.json({ error, number: 4 });
     }
   }
+
+  // ============================================== 3
 
   if (Object.keys(updateData).length > 0) {
     let isUserInfoExists;

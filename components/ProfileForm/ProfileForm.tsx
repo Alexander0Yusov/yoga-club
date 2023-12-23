@@ -72,8 +72,6 @@ const ProfileForm = () => {
     const formData = new FormData(e.target);
 
     if (file) {
-      console.log(44, file);
-
       formData.append("isFileExists", true as any);
       setFile(null);
     }

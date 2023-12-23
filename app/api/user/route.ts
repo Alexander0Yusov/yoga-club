@@ -77,19 +77,18 @@ export async function PATCH(req: Request) {
   }
 
   if (isFileExists) {
-    let imageArrayBuf;
+    const obj: any = {};
+
+    // try {
+    obj.arrayBuffer_ = await file.arrayBuffer();
+    // } catch (error) {
+    //   return Response.json({ error, number: 3 });
+    // }
+
+    const imageBuffer = Buffer.from(obj.arrayBuffer_, "base64");
 
     try {
-      imageArrayBuf = await file.arrayBuffer();
-    } catch (error) {
-      return Response.json({ error, number: 3 });
-    }
-
-    const imageBuffer = Buffer.from(imageArrayBuf, "base64");
-
-    let result: any;
-    try {
-      result = await new Promise((resolve) => {
+      const result: any = await new Promise((resolve) => {
         cloudinary.uploader
           .upload_stream(
             {
@@ -108,12 +107,12 @@ export async function PATCH(req: Request) {
           )
           .end(imageBuffer);
       });
+
+      updateData.portrait = result?.secure_url;
+      delete updateData.id;
     } catch (error) {
       return Response.json({ error, number: 4 });
     }
-
-    updateData.portrait = result?.secure_url;
-    delete updateData.id;
   }
 
   if (Object.keys(updateData).length > 0) {

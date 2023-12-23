@@ -47,10 +47,10 @@ const ProfileForm = () => {
       setPhone(phone_ || "");
       setEmail(email_ || "");
 
-      if (!nickname_) {
-        setNickname(name_ || "");
-      } else {
+      if (nickname_) {
         setNickname(nickname_);
+      } else {
+        setNickname(name_ || "");
       }
     };
 
@@ -100,21 +100,32 @@ const ProfileForm = () => {
   return (
     <>
       {(portrait || image) && (
-        <div
-          id="thumb"
-          className="relative border-[1px] border-lime-400 w-[100px] h-[100px] mb-4 mx-auto"
-        >
-          <Image
-            className=""
-            src={portrait || image}
-            fill
-            sizes="500px"
-            style={{
-              objectFit: "cover",
+        <>
+          <div
+            id="thumb"
+            className="relative border-[1px] border-lime-400 w-[100px] h-[100px] mb-4 mx-auto"
+          >
+            <Image
+              className=""
+              src={portrait || image}
+              fill
+              sizes="500px"
+              style={{
+                objectFit: "cover",
+              }}
+              alt="User portrait"
+            />
+          </div>
+          <button
+            type="button"
+            className="flex w-full justify-center border-[1px] border-lime-400 mb-2"
+            onClick={() => {
+              filePicker.current?.click();
             }}
-            alt="User portrait"
-          />
-        </div>
+          >
+            Pick image
+          </button>
+        </>
       )}
       <form
         onSubmit={handlerSubmit}
@@ -152,16 +163,6 @@ const ProfileForm = () => {
             disabled={true}
           />
         </label>
-
-        <button
-          type="button"
-          className="flex w-full justify-center border-[1px] border-lime-400 mb-2"
-          onClick={() => {
-            filePicker.current?.click();
-          }}
-        >
-          Pick image
-        </button>
 
         {/*Fileinput it is hidden */}
         <input

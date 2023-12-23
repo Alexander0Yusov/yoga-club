@@ -28,6 +28,8 @@ const SignupForm = ({ lang }: { lang: LocaleT }) => {
     if (!res.ok) {
       setError(true);
     } else {
+      console.log(await res.json());
+
       setCreatedUser(true);
       router.push("/signin");
     }

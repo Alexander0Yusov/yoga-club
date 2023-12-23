@@ -15,7 +15,7 @@ const ProfileForm = () => {
 
   const [image, setImage] = useState<string>("");
   const [portrait, setPortrait] = useState<string>("");
-  const [file, setFile] = useState<any>();
+  const [file, setFile] = useState<any>(null);
 
   useEffect(() => {
     const changerFormatFile = () => {
@@ -72,23 +72,22 @@ const ProfileForm = () => {
   const handlerSubmit = async (e: any) => {
     e.preventDefault();
 
-    const formData = new FormData();
+    const formData = new FormData(e.target);
 
-    formData.append("name", nickname);
-    formData.append("phone", phone);
-
-    if (file) {
-      formData.append("file", file);
-    } else {
+    if (!file) {
+      formData.delete("file");
       formData.append("file", "no change");
     }
 
-    const { userInfo } = await (
-      await fetch("/api/user", {
-        method: "PATCH",
-        body: formData,
-      })
-    ).json();
+    let userInfo;
+    try {
+      userInfo = await (
+        await fetch("/api/user", {
+          method: "PATCH",
+          body: formData,
+        })
+      ).json();
+    } catch (error) {}
 
     console.log(userInfo);
 

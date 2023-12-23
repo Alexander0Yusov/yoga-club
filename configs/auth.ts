@@ -46,18 +46,18 @@ export const authConfig: AuthOptions = {
         const user = await User.findOne({ email: credentials.email });
 
         if (user && user.password === credentials.password) {
-          const {
-            _doc: { password, ...restData },
-          } = user;
+          // const {
+          //   _doc: { password, ...restData },
+          // } = user;
 
-          return restData as any; // User_for_type
+          return user as User_for_type;
         }
 
         return null;
       },
     }),
   ],
-  pages: {
-    signIn: "/signin",
-  },
+  // pages: {
+  //   signIn: "/signin",
+  // },
 };

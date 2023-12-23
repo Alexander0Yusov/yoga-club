@@ -72,8 +72,7 @@ const ProfileForm = () => {
     const formData = new FormData(e.target);
 
     if (file === null) {
-      formData.delete("file");
-      formData.append("file", "no change");
+      formData.append("nofile", true as any);
     }
 
     try {

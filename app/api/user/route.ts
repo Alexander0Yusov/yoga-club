@@ -53,6 +53,7 @@ export async function PATCH(req: Request) {
   updateData.phone = formData.get("phone") as string;
 
   const file: any = formData.get("file");
+  const nofile: any = formData.get("nofile");
 
   let email: any;
   try {
@@ -76,7 +77,9 @@ export async function PATCH(req: Request) {
     return Response.json({ error, number: 2 });
   }
 
-  if (file && file !== "no change") {
+  if (!nofile) {
+    console.log(nofile);
+
     let imageArrayBuf;
     try {
       imageArrayBuf = await file.arrayBuffer();
@@ -112,9 +115,6 @@ export async function PATCH(req: Request) {
     }
 
     updateData.portrait = result?.secure_url;
-    delete updateData.id;
-  } else if (file === "no change") {
-    updateData.portrait = "";
     delete updateData.id;
   }
 

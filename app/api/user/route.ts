@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { v2 as cloudinary } from "cloudinary";
 import { UserInfo } from "@/mongoose/models/UserInfo";
 
+import crypto from "crypto";
+
 // GET
 // export async function GET(email: any) {
 //   mongoose.connect(process.env.MONGO_URL as string);
@@ -76,80 +78,101 @@ export async function PATCH(req: Request) {
     return Response.json({ error, number: 2 });
   }
 
-  // ======================================= 1
-  // const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
-  // const uploadPreset = "YOUR_UPLOAD_PRESET";// ???
-  // const cloudinaryApiKey = CLOUDINARY_API_KEY;
-  // const cloudinaryApiSecret = CLOUDINARY_API_SECRET;
-
-  // const fd = new FormData();
-  // fd.append("file", file);
-  // fd.append("upload_preset", uploadPreset);
-
-  // fetch(cloudinaryUrl, {
-  //   method: "POST",
-  //   body: fd,
-  //   headers: {
-  //     Authorization: `Basic ${btoa(
-  //       `${cloudinaryApiKey}:${cloudinaryApiSecret}`
-  //     )}`,
-  //   },
-  // })
-  //   .then((response) => {
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! Status: ${response.status}`);
-  //     }
-  //     return response.json();
-  //   })
-  //   .then((data) => {
-  //     console.log("File uploaded successfully:", data);
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error uploading file to Cloudinary:", error);
-  //   });
-
-  // ========================================= 2
-
+  // ==== 1 способ
   if (isFileExists) {
-    const obj: any = {};
+    const timestamp = Math.round(new Date().getTime() / 1000);
+
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        eager: "c_fill,w_400,h_400,g_face",
+        public_id: updateData.id,
+        timestamp,
+        folder: "yoga-club/avatars",
+      },
+      process.env.CLOUDINARY_API_SECRET!
+    );
+
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("api_key", CLOUDINARY_API_KEY as string);
+    fd.append("eager", "c_fill,w_400,h_400,g_face");
+    fd.append("public_id", updateData.id);
+    fd.append("signature", signature);
+    fd.append("timestamp", String(timestamp));
+    fd.append("folder", "yoga-club/avatars");
+
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+    let imageUrl = "";
 
     try {
-      obj.arrayBuffer_ = await file.arrayBuffer();
+      const response = await (
+        await fetch(cloudinaryUrl, {
+          method: "POST",
+          body: fd,
+        })
+      ).json();
+
+      imageUrl = response.eager[0].secure_url;
     } catch (error) {
-      return Response.json({ error, number: 3 });
+      return Response.json(error);
     }
 
-    const imageBuffer = Buffer.from(obj.arrayBuffer_);
-
     try {
-      const result: any = await new Promise((resolve) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              folder: "yoga-club/avatars",
-              resource_type: "image",
-              use_filename: true,
-              public_id: updateData.id,
-              overwrite: true,
-            },
-            (error, uploadResult) => {
-              if (error) {
-                throw error;
-              }
-              return resolve(uploadResult);
-            }
-          )
-          .end(imageBuffer);
+      const response = await cloudinary.uploader.upload(imageUrl, {
+        folder: "yoga-club/avatars",
+        resource_type: "image",
+        use_filename: true,
+        public_id: updateData.id,
+        overwrite: true,
       });
 
-      updateData.portrait = result?.secure_url;
-      delete updateData.id;
+      updateData.portrait = response.secure_url;
     } catch (error) {
-      return Response.json({ error, number: 4 });
+      return Response.json(error);
     }
+
+    delete updateData.id;
   }
 
-  // ============================================== 3
+  if (false) {
+    // ==== 2 variant
+    // if (isFileExists) {
+    //   const obj: any = {};
+    //   try {
+    //     obj.arrayBuffer_ = await file.arrayBuffer();
+    //   } catch (error) {
+    //     return Response.json({ error, number: 3 });
+    //   }
+    //   const imageBuffer = Buffer.from(obj.arrayBuffer_, "base64");
+    //   try {
+    //     const result: any = await new Promise((resolve) => {
+    //       cloudinary.uploader
+    //         .upload_stream(
+    //           {
+    //             folder: "yoga-club/avatars",
+    //             resource_type: "image",
+    //             use_filename: true,
+    //             public_id: updateData.id,
+    //             overwrite: true,
+    //           },
+    //           (error, uploadResult) => {
+    //             if (error) {
+    //               throw error;
+    //             }
+    //             return resolve(uploadResult);
+    //           }
+    //         )
+    //         .end(imageBuffer);
+    //     });
+    //     updateData.portrait = result?.secure_url;
+    //     delete updateData.id;
+    //   } catch (error) {
+    //     return Response.json({ error, number: 4 });
+    //   }
+    // }
+    // ====
+  }
 
   if (Object.keys(updateData).length > 0) {
     let isUserInfoExists;

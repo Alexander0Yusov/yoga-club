@@ -3,7 +3,11 @@ import EventsItem from "../EventsItem/EventsItem";
 
 const EventsGallery = async () => {
   const getEvents = await import("../../app/api/events/route");
+
   const events = await (await getEvents.GET()).json();
+
+  console.log(events);
+
   return (
     <ul className="flex  flex-wrap w-full gap-[16px]">
       {events.map(
@@ -12,17 +16,23 @@ const EventsGallery = async () => {
           timeTarget,
           title,
           description,
-          imageUrl,
-          videoUrl,
-        }: Record<string, string>) => (
+          picsArray,
+          createdAt,
+        }: {
+          _id: string;
+          timeTarget: string;
+          title: string;
+          description: string;
+          picsArray: [{ id: string; value: string }];
+          createdAt: string;
+        }) => (
           <li key={_id}>
             <EventsItem
               id={_id}
-              timeTarget={timeTarget as string}
+              timeTarget={createdAt as string}
               title={title}
               description={description}
-              imageUrl={imageUrl}
-              videoUrl={videoUrl}
+              picsArray={picsArray}
             />
           </li>
         )

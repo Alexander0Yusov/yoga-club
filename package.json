@@ -10,20 +10,24 @@
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^2.0.9",
+    "@popperjs/core": "^2.11.8",
     "cloudinary": "^1.40.0",
     "date-fns": "^2.30.0",
+    "focus-trap-react": "^10.2.3",
     "i18next": "^23.7.9",
     "i18next-resources-to-backend": "^1.2.0",
     "i18nexus-cli": "^3.3.0",
     "mongodb": "^6.3.0",
     "mongoose": "^8.0.3",
+    "nanoid": "^5.0.4",
     "next": "14.0.4",
     "next-auth": "^4.24.5",
     "next-i18n-router": "^5.0.2",
     "react": "^18",
     "react-day-picker": "^8.9.1",
     "react-dom": "^18",
-    "react-i18next": "^13.5.0"
+    "react-i18next": "^13.5.0",
+    "react-popper": "^2.3.0"
   },
   "devDependencies": {
     "@types/node": "^20",

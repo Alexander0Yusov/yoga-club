@@ -1,22 +1,29 @@
+import { authConfig } from "@/configs/auth";
 import { Events } from "@/mongoose/models/Events";
 import { User } from "@/mongoose/models/User";
 import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
 
 const { MONGO_URL, admins } = process.env;
 
 // POST
 export async function POST(req: Request) {
-  const { email, ...restProps } = await req.json();
-
-  mongoose.connect(MONGO_URL as string);
-
-  const user: any = await User.findOne({ email });
-
-  if (user && admins?.split("|").includes(email)) {
-    const event: any = await Events.create(restProps);
-
-    return Response.json({ event });
+  //
+  let email: any;
+  try {
+    const session = await getServerSession(authConfig);
+    email = session?.user?.email;
+  } catch (error) {
+    return Response.json({ error, number: 1 });
   }
+
+  // if (email && admins?.split("|").includes(email)) {
+  mongoose.connect(MONGO_URL as string);
+  const body = await req.json();
+  const event: any = await Events.create(body);
+
+  return Response.json(event);
+  // }
 
   return Response.json(null);
 }

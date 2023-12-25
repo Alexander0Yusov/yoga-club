@@ -1,50 +1,16 @@
-// 2
-// import { useState } from "react";
-// import { format } from "date-fns";
-// import { uk, enUS, de } from "date-fns/locale";
-
-// import { DayPicker } from "react-day-picker";
-// import "react-day-picker/dist/style.css";
-
-// export default function DateTimePicker() {
-//   const [selected, setSelected] = useState<Date>();
-
-//   let footer = <p>Please pick a day.</p>;
-//   if (selected) {
-//     footer = <p>You picked {format(selected, "PP")}.</p>;
-//   }
-
-//   const handleDayClick = (day: Date) => setSelected(day);
-
-//   return (
-//     <DayPicker
-//       mode="single"
-//       selected={selected}
-//       onSelect={setSelected}
-//       footer={footer}
-//       //
-
-//       onDayClick={handleDayClick}
-//       fromYear={2015}
-//       toYear={2025}
-//       captionLayout="dropdown-buttons"
-//       // numberOfMonths={2}
-//       // pagedNavigation
-//       showOutsideDays
-//       fixedWeeks
-//       locale={uk}
-//     />
-//   );
-// }
-
-// import React, { ChangeEventHandler, useRef, useState } from "react";
-
 // import { format, isValid, parse } from "date-fns";
 // import FocusTrap from "focus-trap-react";
-// import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 // import { usePopper } from "react-popper";
+// import React, { ChangeEventHandler, useRef, useState } from "react";
+// import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 
-// export default function DatePickerDialog() {
+// export default function DateTimePicker({
+//   timeTarget,
+//   setTimeTarget,
+// }: {
+//   timeTarget: string;
+//   setTimeTarget: any;
+// }) {
 //   const [selected, setSelected] = useState<Date>();
 //   const [inputValue, setInputValue] = useState<string>("");
 //   const [isPopperOpen, setIsPopperOpen] = useState(false);
@@ -69,6 +35,7 @@
 //     const date = parse(e.currentTarget.value, "y-MM-dd", new Date());
 //     if (isValid(date)) {
 //       setSelected(date);
+//       setTimeTarget(date);
 //     } else {
 //       setSelected(undefined);
 //     }
@@ -107,6 +74,7 @@
 //           Pick a date
 //         </button>
 //       </div>
+
 //       {isPopperOpen && (
 //         <FocusTrap
 //           active
@@ -140,3 +108,48 @@
 //     </div>
 //   );
 // }
+
+// 2
+import { useState } from "react";
+import { format } from "date-fns";
+import { uk, enUS, de } from "date-fns/locale";
+
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+
+export default function DateTimePicker({
+  timeTarget,
+  setTimeTarget,
+}: {
+  timeTarget: string;
+  setTimeTarget: any;
+}) {
+  const [selected, setSelected] = useState<Date>();
+
+  let footer = <p>Please pick a day.</p>;
+  if (selected) {
+    footer = <p>You picked {format(selected, "PP")}.</p>;
+  }
+
+  const handleDayClick = (day: Date) => setSelected(day);
+
+  return (
+    <DayPicker
+      mode="single"
+      selected={selected}
+      onSelect={setSelected}
+      footer={footer}
+      //
+
+      onDayClick={handleDayClick}
+      fromYear={2015}
+      toYear={2025}
+      captionLayout="dropdown-buttons"
+      // numberOfMonths={2}
+      // pagedNavigation
+      showOutsideDays
+      fixedWeeks
+      locale={uk}
+    />
+  );
+}

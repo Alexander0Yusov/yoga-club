@@ -1,17 +1,37 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-
-import Header from "@/sections/Header/Header";
-import Footer from "@/sections/Footer/Footer";
+import { Inter, Philosopher, Mulish } from "next/font/google";
 
 import { LocaleT, i18nConfig } from "@/i18nConfig";
 import { dir } from "i18next";
-// import TranslationsProvider from "@/components/TranslationsProvider";
 import initTranslations from "./i18n";
-import MySessionProvider from "@/components/MySessionProvider/MySessionProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+// import TranslationsProvider from "@/components/TranslationsProvider";
+import MySessionProvider from "@/components/MySessionProvider/MySessionProvider";
+import Header from "@/sections/Header/Header";
+import Footer from "@/sections/Footer/Footer";
+
+import "./globals.css";
+
+const inter = Inter({
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-inter",
+  subsets: ["cyrillic", "latin"],
+});
+
+const mulish = Mulish({
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-mulish",
+  subsets: ["cyrillic", "latin"],
+});
+
+const philosopher = Philosopher({
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-philosopher",
+  subsets: ["cyrillic", "latin"],
+});
 
 const i18nNamespaces = ["homePage", "eventsPage"];
 
@@ -40,7 +60,9 @@ export default async function RootLayout({
         locale={lang}
         resources={resources}
       > */}
-      <body className={inter.className}>
+      <body
+        className={`${inter.variable} ${mulish.variable} ${philosopher.variable}`}
+      >
         <MySessionProvider>
           <Header lang={lang} />
           <main className="flex flex-col items-center justify-between">

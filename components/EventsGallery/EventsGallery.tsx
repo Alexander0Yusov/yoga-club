@@ -6,8 +6,6 @@ const EventsGallery = async () => {
 
   const events = await (await getEvents.GET()).json();
 
-  console.log(events);
-
   return (
     <ul className="flex  flex-wrap w-full gap-[16px]">
       {events.map(
@@ -29,7 +27,7 @@ const EventsGallery = async () => {
           <li key={_id}>
             <EventsItem
               id={_id}
-              timeTarget={createdAt as string}
+              timeTarget={timeTarget as string}
               title={title}
               description={description}
               picsArray={picsArray}

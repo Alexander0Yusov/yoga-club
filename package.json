@@ -27,7 +27,8 @@
     "react-day-picker": "^8.9.1",
     "react-dom": "^18",
     "react-i18next": "^13.5.0",
-    "react-popper": "^2.3.0"
+    "react-popper": "^2.3.0",
+    "swiper": "^11.0.5"
   },
   "devDependencies": {
     "@types/node": "^20",

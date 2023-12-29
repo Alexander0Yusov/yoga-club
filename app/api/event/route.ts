@@ -20,8 +20,28 @@ export async function GET(id: any) {
 
     return Response.json({ error: "Event not found" });
   } catch (error) {
-    console.error(error);
+    return Response.json({ error: "Internal Server Error" });
+  }
+}
 
+// PATCH
+export async function PATCH(req: Request) {
+  const { id, ...updateData } = await req.json();
+
+  if (!id) {
+    return Response.json({ error: "Missing id parameter" });
+  }
+  mongoose.connect(MONGO_URL as string);
+
+  try {
+    const event: any = await Events.findByIdAndUpdate(id, { ...updateData });
+
+    if (event) {
+      return Response.json(event);
+    }
+
+    return Response.json({ error: "Event not found" });
+  } catch (error) {
     return Response.json({ error: "Internal Server Error" });
   }
 }

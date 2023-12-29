@@ -8,11 +8,32 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    // MEDIA QUERIES
+    screens: {
+      w480: "480px",
+      w768: "768px",
+      w1280: "1280px",
+      w1440: "1440px",
+
+      smOnly: { max: "767.98px" },
+      mdOnly: { min: "768px", max: "1279.98px" },
+      notXl: { max: "1279.98px" },
+    },
+
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      // FONTS
+      fontFamily: {
+        inter: ["var(--font-inter)"],
+        mulish: ["var(--font-mulish)"],
+        philosopher: ["var(--font-philosopher)"],
+      },
+      fontSize: {
+        base: ["16px", "1.2"],
+        md: ["18px", "1.2"],
+        lg: ["20px", "1.2"],
+        xl: ["24px", "1.2"],
+        xxl: ["32px", "1.2"],
+        xxxl: ["40px", "1.2"],
       },
     },
   },

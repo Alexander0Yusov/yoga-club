@@ -1,4 +1,5 @@
 import initTranslations from "@/app/[lang]/i18n";
+import Container from "@/components/0_ui/Container/Container";
 import HeaderNavbar from "@/components/HeaderNavbar/HeaderNavbar";
 import LanguageChanger from "@/components/LanguageChanger/LanguageChanger";
 import Logo from "@/components/Logo/Logo";
@@ -15,12 +16,14 @@ const Header = async ({ lang }: { lang: any }) => {
       locale={lang}
       resources={resources}
     >
-      <header className="flex justify-between items-center border-[1px] border-orange-950 h-[60px]">
-        <Logo />
+      <header>
+        <Container className="flex justify-between items-center border-[1px] border-orange-950 h-[60px]">
+          <Logo />
 
-        <HeaderNavbar lang={lang} />
+          <HeaderNavbar lang={lang} />
 
-        <LanguageChanger />
+          <LanguageChanger />
+        </Container>
       </header>
     </TranslationsProvider>
   );

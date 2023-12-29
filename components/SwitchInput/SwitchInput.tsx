@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 
@@ -17,33 +18,31 @@ const SwitchInput = ({
 
       if (
         !elementsInPropagationPath.find((el: any) =>
-          el?.className?.includes("touchOrCloseTargetEl")
+          el?.classList?.contains("touchOrCloseTargetEl")
         )
       ) {
         setIsOpenInput(false);
         setUrlImage("");
       }
     };
-    document.body.addEventListener("click", handlerClickOnNotTarget);
-    return () =>
-      document.body.removeEventListener("click", handlerClickOnNotTarget);
-  }, []);
 
-  useEffect(() => {
     const handlerKeydown = (e: any) => {
       if (e.code === "Escape") {
         setIsOpenInput(false);
       }
     };
-    window.addEventListener("keydown", handlerKeydown);
-    return () => {
-      window.removeEventListener("keydown", handlerKeydown);
-    };
-  }, [setIsOpenInput]);
 
-  const handleSubmit = () => {
-    urlImage &&
-      setPicsArray((prev: any) => [...prev, { id: nanoid(), value: urlImage }]);
+    if (isOpenInput) {
+      document.body.addEventListener("click", handlerClickOnNotTarget);
+      window.addEventListener("keydown", handlerKeydown);
+    } else {
+      document.body.removeEventListener("click", handlerClickOnNotTarget);
+      window.removeEventListener("keydown", handlerKeydown);
+    }
+  }, [isOpenInput, setIsOpenInput]);
+
+  const handleAddUrl = () => {
+    urlImage && setPicsArray([...picsArray, { id: nanoid(), value: urlImage }]);
 
     setUrlImage("");
     setIsOpenInput(!isOpenInput);
@@ -52,14 +51,11 @@ const SwitchInput = ({
   return (
     <>
       {isOpenInput ? (
-        <form
-          className="flex gap-2 border-[1px] border-orange-700 touchOrCloseTargetEl"
-          onSubmit={handleSubmit}
-        >
+        <div className="flex gap-2 border-[1px] border-orange-700 touchOrCloseTargetEl">
           <button
             className="block border-[1px] border-orange-950 w-[24px] h-full"
             type="submit"
-            onClick={handleSubmit}
+            onClick={handleAddUrl}
           >
             +
           </button>
@@ -78,14 +74,14 @@ const SwitchInput = ({
             value={urlImage}
             onChange={(e) => setUrlImage(e.target.value)}
           />
-        </form>
+        </div>
       ) : (
-        <p
-          className="border-[1px] border-orange-700 "
+        <button
+          className="block w-full border-[1px] border-orange-700 "
           onClick={() => setIsOpenInput(!isOpenInput)}
         >
           Add picture
-        </p>
+        </button>
       )}
     </>
   );

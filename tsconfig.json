@@ -28,7 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "components/FeedbackSlider/FeedbackSlider.tsx",
-    "mongoDbAdapter/MongoDbClient.js"
+    "mongoDbAdapter/MongoDbClient.ts"
   ],
   "exclude": ["node_modules"]
 }

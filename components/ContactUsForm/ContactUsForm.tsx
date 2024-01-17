@@ -17,56 +17,60 @@ const ContactUsForm = () => {
   return (
     <form onSubmit={handlerSubmit} className="border-[1px] border-orange-700">
       <div className="flex w-full justify-between">
-        <div>
-          <label className="flex flex-col mb-[30px]">
+        <div className=" w-[683px]">
+          <label className="block mb-[12px] text-fs16 border-[1px] border-orange-700">
             Прізвище та Ім’я
             <input
               name="name"
-              className="h-[60px]"
+              className="w-full h-[60px] px-[8px] mt-[8px] rounded-[10px] border-[1px] border-lilac"
               type="text"
               placeholder="Іван Іванов"
             />
           </label>
 
-          <label className="flex flex-col mb-[30px]">
+          <label className="block mb-[12px] text-fs16 border-[1px] border-orange-700">
             Електронна пошта
             <input
               name="email"
-              className="h-[60px]"
+              className="w-full h-[60px] px-[8px] mt-[8px] rounded-[10px] border-[1px] border-lilac"
               type="email"
               placeholder="abcd@efgh.mail"
             />
           </label>
 
-          <label className="flex flex-col">
+          <label className="block text-fs16 border-[1px] border-orange-700">
             Телефон
             <input
               name="phone"
-              className="h-[60px]"
+              className="w-full h-[60px] px-[8px] mt-[8px] rounded-[10px] border-[1px] border-lilac"
               type="text"
               placeholder="+380991234567"
             />
           </label>
         </div>
 
-        <div className="w-[185px]">
-          <label className="flex flex-col ">
+        <div className="flex flex-col justify-between w-[683px] ">
+          <label className=" ">
             Коментар
             <textarea
               name="textarea"
-              className=" h-[220px] px-1 resize-none rounded-[10px] caret-black font-mulish"
+              className=" w-full h-[208px] p-[8px] mt-[4px] resize-none rounded-[10px] border-[1px] border-lilac caret-black "
             />
           </label>
 
-          <label className="cursor-pointer flex flex-row-reverse">
-            <span>Згода на обробку персональних даних</span>
-            <input className=" " type="checkbox" />
+          <label className="cursor-pointer flex flex-row-reverse justify-end ">
+            <span className=" text-fs16">
+              Згода на обробку персональних даних
+            </span>
+            <input className=" mr-[8px] " type="checkbox" />
           </label>
         </div>
       </div>
 
+      {/* <LinkAncor href={""}>Записатись</LinkAncor> */}
+
       <button
-        className="block w-[250px] h-[50px] mx-auto border-[2px] border-black rounded-full"
+        className="block w-[250px] h-[50px] ml-auto mt-[32px] bg-brown-light-light border-[2px] border-localbrown rounded-full"
         type="submit"
       >
         Отправить заявку

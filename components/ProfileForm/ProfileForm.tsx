@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import ChevronDown from "../0_ui/ChevronDown";
 
 const ProfileForm = () => {
   const filePicker: React.LegacyRef<HTMLInputElement> | undefined =
@@ -98,40 +99,37 @@ const ProfileForm = () => {
   return (
     <>
       {(portrait || image) && (
-        <>
+        <div className="flex items-center pb-[30px] border-b-[1px] border-lilac">
+          <p className="w-[323px] text-cadetblue">Фото профілю</p>
           <div
             id="thumb"
-            className="relative border-[1px] border-lime-400 w-[100px] h-[100px] mb-4 mx-auto"
+            className="relative border-[1px] w-[70px] h-[70px] rounded-full overflow-hidden"
           >
             <Image
-              className=""
               src={portrait || image}
-              fill
-              sizes="500px"
-              style={{
-                objectFit: "cover",
-              }}
               alt="User portrait"
+              width={70}
+              height={70}
+              className="h-full w-full object-cover object-center"
             />
           </div>
           <button
             type="button"
-            className="flex w-full justify-center border-[1px] border-lime-400 mb-2"
+            className="flex w-[40px] h-[40px] ml-auto justify-center items-center "
             onClick={() => {
               filePicker.current?.click();
             }}
           >
-            Pick image
+            <ChevronDown className=" w-[20px]" />
           </button>
-        </>
+        </div>
       )}
-      <form
-        onSubmit={handlerSubmit}
-        className="border-[1px] border-orange-950 "
-      >
-        <label className="flex flex-col border-[1px] border-lime-400 mb-2">
-          Name
+
+      <form onSubmit={handlerSubmit} className="  ">
+        <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
+          <span className="w-[323px] text-cadetblue">Ім'я</span>
           <input
+            className=" w-[300px]"
             name="nickname"
             type="text"
             placeholder="Name"
@@ -141,9 +139,10 @@ const ProfileForm = () => {
         </label>
 
         {/* Ругается на этот элемент, компонент перевести на контролируемый */}
-        <label className="flex flex-col border-[1px] border-lime-400 mb-2">
-          Phone
+        <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
+          <span className="w-[323px] text-cadetblue">Телефон</span>
           <input
+            className=" w-[300px]"
             name="phone"
             type="text"
             placeholder="+380991234567"
@@ -152,17 +151,17 @@ const ProfileForm = () => {
           />
         </label>
 
-        <label className="flex flex-col border-[1px] border-lime-400 mb-2">
-          Email
+        <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
+          <span className="w-[323px] text-cadetblue">Електронна пошта</span>
           <input
-            className=" appearance-none bg-gray-200  text-gray-900 "
+            className=" appearance-none text-gray-900 "
             type="text"
             placeholder={email}
             disabled={true}
           />
         </label>
 
-        {/*Fileinput it is hidden */}
+        {/*Fileinput is hidden */}
         <input
           name="file"
           className="hidden"
@@ -174,9 +173,9 @@ const ProfileForm = () => {
 
         <button
           type="submit"
-          className="flex w-full justify-center border-[1px] border-lime-400"
+          className="block w-[92px] h-[30px] mx-auto mt-[20px] rounded-[10px] border-[1px] border-localbrown text-localbrown"
         >
-          Apply
+          Зберегти
         </button>
       </form>
     </>

@@ -1,18 +1,22 @@
+import Container from "@/components/0_ui/Container/Container";
+import LinksEventsPages from "@/components/0_ui/LinksEventsPages/LinksEventsPages";
 import ButtonCreateEvent from "@/components/ButtonCreateEvent/ButtonCreateEvent";
 import EventsGallery from "@/components/EventsGallery/EventsGallery";
 import React from "react";
 
 const EventsPage = async () => {
   return (
-    <section>
-      <h1 className="w-full border-[1px] border-orange-950 text-center py-[20px]">
-        Events Page
-      </h1>
+    <Container className=" pt-[50px] pb-[70px]">
+      <h2 className=" mb-[30px] font-philosopher font-bold text-fs60 text-localbrown">
+        Наші події
+      </h2>
+
+      <LinksEventsPages />
 
       <ButtonCreateEvent />
 
       <EventsGallery />
-    </section>
+    </Container>
   );
 };
 

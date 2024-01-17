@@ -18,7 +18,7 @@ const Header = async ({ lang }: { lang: any }) => {
     >
       <header>
         <Container className="flex justify-between items-center border-[1px] border-orange-950 h-[60px]">
-          <Logo />
+          <Logo className="" />
 
           <HeaderNavbar lang={lang} />
 

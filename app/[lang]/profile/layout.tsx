@@ -1,3 +1,5 @@
+import Container from "@/components/0_ui/Container/Container";
+import LinksProfilePage from "@/components/0_ui/LinksProfilePage/LinksProfilePage";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,9 +13,18 @@ export default async function ProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-between border-[1px] border-orange-300">
-      <div>Common profile data</div>
+    <Container>
+      <button className="block w-[92px] h-[30px] ml-auto mt-[20px] rounded-[10px] border-[1px] border-localbrown text-localbrown">
+        Вихід
+      </button>
+
+      <h2 className=" mb-[30px] font-philosopher font-bold text-fs60 text-localbrown">
+        Ваш профіль
+      </h2>
+
+      <LinksProfilePage />
+
       {children}
-    </div>
+    </Container>
   );
 }

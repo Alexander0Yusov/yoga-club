@@ -1,0 +1,7 @@
+.zoom-image {
+  transition: transform 0.3s ease-in-out;
+}
+
+#myLink:hover .zoom-image {
+  transform: scale(1.03);
+}

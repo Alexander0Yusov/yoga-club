@@ -1,5 +1,3 @@
-import React from "react";
-
 const ChevronDown = ({ className = "w-6 h-6" }) => {
   return (
     <svg

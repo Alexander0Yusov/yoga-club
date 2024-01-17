@@ -29,6 +29,7 @@ export const POST = async (req: Request) => {
     message += `Текст: ${textarea}\n`;
   }
 
+  // https://api.telegram.org/bot<TG_API_KEY>/getUpdates
   try {
     const URI_API = `https://api.telegram.org/bot${TG_API_KEY}/sendMessage`;
     const response = await fetch(URI_API, {

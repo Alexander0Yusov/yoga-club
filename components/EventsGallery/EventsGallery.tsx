@@ -7,7 +7,7 @@ const EventsGallery = async () => {
   const events = await (await getEvents.GET()).json();
 
   return (
-    <ul className="flex  flex-wrap w-full gap-[16px]">
+    <ul className="flex flex-col w-full gap-[50px]">
       {events.map(
         ({
           _id,

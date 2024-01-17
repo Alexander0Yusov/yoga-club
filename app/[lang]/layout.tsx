@@ -8,9 +8,11 @@ import initTranslations from "./i18n";
 // import TranslationsProvider from "@/components/TranslationsProvider";
 import MySessionProvider from "@/components/MySessionProvider/MySessionProvider";
 import Header from "@/sections/Header/Header";
+import Header2 from "@/sections/Header2/Header2";
 import Footer from "@/sections/Footer/Footer";
 
 import "./globals.css";
+import Footer2 from "@/sections/Footer2/Footer2";
 
 const inter = Inter({
   weight: ["400", "700"],
@@ -65,10 +67,15 @@ export default async function RootLayout({
       >
         <MySessionProvider>
           <Header lang={lang} />
-          <main className="flex flex-col items-center justify-between">
+          <Header2 lang={lang} />
+
+          <main className="flex flex-col items-center justify-between font-mulish">
             {children}
           </main>
-          <Footer />
+          <Footer2 />
+
+          {/* <Footer /> */}
+
           <div id="modal" />
         </MySessionProvider>
       </body>

@@ -11,6 +11,7 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^2.0.9",
     "@popperjs/core": "^2.11.8",
+    "react-transition-group": "^4.4.5",
     "cloudinary": "^1.40.0",
     "date-fns": "^2.30.0",
     "focus-trap-react": "^10.2.3",
@@ -31,6 +32,7 @@
     "swiper": "^11.0.5"
   },
   "devDependencies": {
+    "@types/react-transition-group": "^4.4.8",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

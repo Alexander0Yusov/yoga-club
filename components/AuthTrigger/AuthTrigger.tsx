@@ -12,7 +12,7 @@ const AuthTrigger = () => {
     if (session.status === "unauthenticated") {
       router.push("/");
     }
-  }, [session]);
+  }, [session.status]);
 
   return <div>AuthTrigger</div>;
 };

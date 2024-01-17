@@ -1,6 +1,7 @@
 "use client";
+
 import React, { useState } from "react";
-import ChevronDown from "../ChevronDown";
+import ChevronDown from "../0_ui/ChevronDown";
 
 import DateTimePicker from "../DateTimePicker/DateTimePicker";
 
@@ -98,7 +99,7 @@ const ButtonCreateEvent = ({
   };
 
   return (
-    <div className="flex flex-col items-center max-w-[900px] mx-auto overflow-hidden border-[1px] border-orange-950 rounded-2xl">
+    <div className="flex flex-col items-center max-w-[900px] mx-auto mb-[30px] overflow-hidden border-[1px] border-orange-700 rounded-2xl">
       <button
         onClick={() => setIsFormOpen(!isFormOpen)}
         className="flex items-center gap-2 border-[1px] border-orange-950"

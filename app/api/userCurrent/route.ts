@@ -16,6 +16,7 @@ export async function GET() {
     const isUserInfoExists = await UserInfo.findOne({ owner: email });
 
     if (isUserInfoExists) {
+      // это можно через популейт выполнить, изменив формат ответа
       const sessionDataPromise = User.findOne({ email });
       const userInfoDataPromise = UserInfo.findOne({ owner: email });
 
@@ -28,9 +29,36 @@ export async function GET() {
     } else {
       const sessionData = await User.findOne({ email });
 
-      return Response.json({ ...sessionData._doc });
+      const userInfoData = await UserInfo.create({
+        ownerId: sessionData._doc._id,
+        owner: email,
+      });
+
+      return Response.json({ ...userInfoData._doc, ...sessionData._doc });
     }
   } else {
     return Response.json(null);
   }
+
+  // if (email) {
+  //   const isUserInfoExists = await UserInfo.findOne({ owner: email });
+
+  //   if (isUserInfoExists) {
+  //     const sessionDataPromise = User.findOne({ email });
+  //     const userInfoDataPromise = UserInfo.findOne({ owner: email });
+
+  //     const [sessionData, userInfoData] = await Promise.all([
+  //       sessionDataPromise,
+  //       userInfoDataPromise,
+  //     ]);
+
+  //     return Response.json({ ...userInfoData._doc, ...sessionData._doc });
+  //   } else {
+  //     const sessionData = await User.findOne({ email });
+
+  //     return Response.json({ ...sessionData._doc });
+  //   }
+  // } else {
+  //   return Response.json(null);
+  // }
 }

@@ -127,7 +127,7 @@ const ProfileForm = () => {
 
       <form onSubmit={handlerSubmit} className="  ">
         <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
-          <span className="w-[323px] text-cadetblue">Ім'я</span>
+          <span className="w-[323px] text-cadetblue">{"Ім'я"}</span>
           <input
             className=" w-[300px]"
             name="nickname"

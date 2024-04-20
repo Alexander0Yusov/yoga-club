@@ -2,18 +2,21 @@ import mongoose, { Schema, models, model } from "mongoose";
 
 const userInfoSchema = new Schema(
   {
-    owner: { type: String },
-    ownerId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      unique: true,
     },
-    isAdmin: { type: Boolean, default: false },
+    userEmail: { type: String, unique: true },
     nickname: { type: String, default: "" },
     portrait: { type: String, default: "" },
     phone: { type: String, default: "" },
-    subscribedForNews: { type: Boolean, default: false },
+    isSubscribed: { type: Boolean, default: false },
+
+    isAdmin: { type: Boolean, default: false },
+    isInBlacklist: { type: Boolean, default: false },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true }
 );
 
 export const UserInfo = models?.UserInfo || model("UserInfo", userInfoSchema);

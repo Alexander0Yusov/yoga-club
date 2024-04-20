@@ -13,14 +13,14 @@ const HeaderNavbar = ({ lang }: { lang: LocaleT }) => {
     // если нет, то создать с пустыми полями и вернуть
     // если есть то просто вернуть.
 
+    const getData = async () => {
+      //const { email, portrait, image, name, nickname, phone }
+      const res = await (await fetch("/api/userCurrent")).json();
+
+      console.log(res);
+    };
+
     if (session.data?.user) {
-      const getData = async () => {
-        //const { email, portrait, image, name, nickname, phone }
-        const res = await (await fetch("/api/userCurrent")).json();
-
-        console.log(res);
-      };
-
       getData();
     }
   }, [session.status === "authenticated"]);

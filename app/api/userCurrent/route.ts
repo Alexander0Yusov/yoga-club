@@ -13,28 +13,44 @@ export async function GET() {
   const email = session?.user?.email;
 
   if (email) {
-    const isUserInfoExists = await UserInfo.findOne({ owner: email });
+    const isUserInfoExists = await UserInfo.findOne({ userEmail: email });
 
     if (isUserInfoExists) {
       // это можно через популейт выполнить, изменив формат ответа
-      const sessionDataPromise = User.findOne({ email });
-      const userInfoDataPromise = UserInfo.findOne({ owner: email });
+      const sessionDataPromise: any = User.findOne({ email });
+      const userInfoDataPromise = UserInfo.findOne({ userEmail: email });
 
       const [sessionData, userInfoData] = await Promise.all([
         sessionDataPromise,
         userInfoDataPromise,
       ]);
 
-      return Response.json({ ...userInfoData._doc, ...sessionData._doc });
+      const result = { ...userInfoData._doc, ...sessionData._doc };
+
+      delete result._id;
+      delete result.userEmail;
+      delete result.userId;
+      delete result.emailVerified;
+      delete result.updatedAt;
+
+      return Response.json(result);
     } else {
       const sessionData = await User.findOne({ email });
 
       const userInfoData = await UserInfo.create({
-        ownerId: sessionData._doc._id,
-        owner: email,
+        userId: sessionData._doc._id,
+        userEmail: email,
       });
 
-      return Response.json({ ...userInfoData._doc, ...sessionData._doc });
+      const result = { ...userInfoData._doc, ...sessionData._doc };
+
+      delete result._id;
+      delete result.userEmail;
+      delete result.userId;
+      delete result.emailVerified;
+      delete result.updatedAt;
+
+      return Response.json(result);
     }
   } else {
     return Response.json(null);

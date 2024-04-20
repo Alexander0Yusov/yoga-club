@@ -3,28 +3,30 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const HomeAncorsHeader = () => {
   const nav = usePathname();
+  const { t } = useTranslation();
 
   const homePathArray = ["/en", "/de", "/"];
 
   return homePathArray.includes(nav) ? (
     <ul className="flex gap-[12px] ml-auto border-[1px] border-orange-950">
       <li>
-        <Link href={"#directions"}>Напрямки йоги</Link>
+        <Link href={"#directions"}>{t("HomeAncorsHeader_dirs")}</Link>
       </li>
 
       <li>
-        <Link href={`#events`}>Наші події</Link>
+        <Link href={`#events`}>{t("HomeAncorsHeader_evnts")}</Link>
       </li>
 
       <li>
-        <Link href={"#demovideos"}>Відео галерея</Link>
+        <Link href={"#demovideos"}>{t("HomeAncorsHeader_vids")}</Link>
       </li>
 
       <li>
-        <Link href={"#contactus"}>Контакти</Link>
+        <Link href={"#contactus"}>{t("HomeAncorsHeader_conts")}</Link>
       </li>
     </ul>
   ) : (

@@ -1,41 +1,80 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
 import FeedbacksItem from "../FeedbacksItem/FeedbacksItem";
 
-const FeedbacksGallery = async () => {
-  const getFeedbacks = await import("../../app/api/feedbacks/route");
+const FeedbacksGallery = () => {
+  const [feedbacks, setFeedbacks] = useState<any>([]);
 
-  const feedbacks = await (await getFeedbacks.GET()).json();
+  useEffect(() => {
+    const getFeedbacks = async () => {
+      const result = await fetch("/api/feedbacks");
 
-  // console.log(88, feedbacks);
+      const res = await result.json();
+
+      setFeedbacks(res);
+
+      console.log("FBcks", res);
+    };
+
+    getFeedbacks();
+  }, []);
+
+  const delHandler = async (id: any) => {
+    let isDelAllowed = confirm("Підтверджуєте видалення?");
+    if (!isDelAllowed) return;
+
+    const deletingPromise = new Promise(async (resolve: any, reject) => {
+      const result = await fetch("/api/feedbacks", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          _id: id,
+        }),
+      });
+
+      if (result.ok) {
+        resolve();
+      } else reject();
+    });
+
+    await toast.promise(
+      deletingPromise,
+      {
+        loading: "Обробка даних...",
+        success: "Дані збережено",
+        error: "Помилка збереження",
+      },
+      {
+        success: {
+          duration: 2500,
+        },
+        error: {
+          duration: 4000,
+        },
+      }
+    );
+  };
 
   return (
-    //  <></>
-    <ul className="flex  flex-wrap w-full gap-[16px]">
-      {feedbacks.map(
-        ({
-          _id,
-          text,
-          owner: { name, image },
-          ownerInfo: { nickname, portrait },
-          createdAt,
-        }: {
-          _id: string;
-          text: string;
-          owner: any;
-          ownerInfo: any;
-          createdAt: string;
-        }) => (
-          <li key={_id}>
+    <>
+      <ul className="flex flex-col gap-[50px]">
+        {feedbacks.map((item: any) => (
+          <li key={item._id}>
             <FeedbacksItem
-              text={text}
-              name={nickname || name}
-              image={portrait || image}
-              createdAt={createdAt}
+              id={item._id}
+              date={item.createdAt}
+              text={item.text}
+              del={delHandler}
             />
           </li>
-        )
-      )}
-    </ul>
+        ))}
+      </ul>
+    </>
   );
 };
 

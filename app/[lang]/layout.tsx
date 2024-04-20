@@ -4,8 +4,9 @@ import { Inter, Philosopher, Mulish } from "next/font/google";
 import { LocaleT, i18nConfig } from "@/i18nConfig";
 import { dir } from "i18next";
 import initTranslations from "./i18n";
+import { Toaster } from "react-hot-toast";
 
-// import TranslationsProvider from "@/components/TranslationsProvider";
+import { TranslationsProvider } from "@/components/TranslationsProvider";
 import MySessionProvider from "@/components/MySessionProvider/MySessionProvider";
 import Header from "@/sections/Header/Header";
 import Header2 from "@/sections/Header2/Header2";
@@ -13,6 +14,7 @@ import Footer from "@/sections/Footer/Footer";
 
 import "./globals.css";
 import Footer2 from "@/sections/Footer2/Footer2";
+import ButtonToTop from "@/components/ButtonToTop/ButtonToTop";
 
 const inter = Inter({
   weight: ["400", "700"],
@@ -57,29 +59,31 @@ export default async function RootLayout({
 
   return (
     <html lang={lang} dir={dir(lang)}>
-      {/* <TranslationsProvider
+      <TranslationsProvider
         namespaces={i18nNamespaces}
         locale={lang}
         resources={resources}
-      > */}
-      <body
-        className={`${inter.variable} ${mulish.variable} ${philosopher.variable}`}
       >
-        <MySessionProvider>
-          <Header lang={lang} />
-          <Header2 lang={lang} />
+        <body
+          className={`${inter.variable} ${mulish.variable} ${philosopher.variable} relative`}
+        >
+          <MySessionProvider>
+            {/* <Header lang={lang} /> */}
+            <Header2 lang={lang} />
 
-          <main className="flex flex-col items-center justify-between font-mulish">
-            {children}
-          </main>
-          <Footer2 />
+            <main className="flex flex-col items-center justify-between font-mulish ">
+              {children}
+            </main>
+            <Footer2 />
 
-          {/* <Footer /> */}
+            {/* <Footer /> */}
 
-          <div id="modal" />
-        </MySessionProvider>
-      </body>
-      {/* </TranslationsProvider> */}
+            <div id="modal" />
+            <Toaster />
+            <ButtonToTop />
+          </MySessionProvider>
+        </body>
+      </TranslationsProvider>
     </html>
   );
 }

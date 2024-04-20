@@ -61,7 +61,10 @@ export default function FeedbackSlider({ data }: { data: any }) {
           prevEl: "#feedbacks-swiper-button-prev",
           nextEl: "#feedbacks-swiper-button-next",
         }}
-        keyboard={true}
+        keyboard={{
+          enabled: true,
+          onlyInViewport: false,
+        }}
         effect={"coverflow"}
         coverflowEffect={{
           rotate: 1,
@@ -84,6 +87,7 @@ export default function FeedbackSlider({ data }: { data: any }) {
         speed={1000}
         centeredSlides={true}
         grabCursor={true}
+        lazyPreloadPrevNext={3}
         className="mySwiper mb-[20px]"
       >
         <div className="swiper-wrapper">
@@ -91,7 +95,7 @@ export default function FeedbackSlider({ data }: { data: any }) {
             <SwiperSlide key={item._id} className="">
               <div className=" relative w-[200px] h-[200px] rounded-full overflow-hidden">
                 <Image
-                  src={item?.ownerInfo?.portrait || item?.owner?.image}
+                  src={item?.userInfoId?.portrait || item?.userId?.image}
                   alt={"client portrait"}
                   width={200}
                   height={200}
@@ -121,12 +125,14 @@ export default function FeedbackSlider({ data }: { data: any }) {
               className="border-[1px] border-orange-950"
             >
               <p className="mx-auto mb-[20px] text-fs24 text-cadetblue text-center">
-                {item.ownerInfo.nickname || item.owner.name}
+                {item.userInfoId?.nickname || item.userId.name}
               </p>
 
-              <div className="flex flex-col justify-between w-[710px] h-[120px] px-[45px] py-[20px] mx-auto bg-white rounded-[20px] border-[1px] border-lilac">
-                <p>{item.text}</p>
-                <p className=" text-[8px] ">{item.updatedAt}</p>
+              <div className="flex flex-col justify-between w-[710px] h-[130px] px-[45px] py-[20px] mx-auto bg-white rounded-[20px] border-[1px] border-lilac">
+                <p className=" h-[75px] overflow-x-hidden overflow-y-auto ">
+                  {item.text}
+                </p>
+                <p className=" text-[8px] mt-auto">{item.updatedAt}</p>
               </div>
             </SwiperSlide>
           ))}

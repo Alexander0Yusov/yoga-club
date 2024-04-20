@@ -1,14 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
+import Image from "next/image";
 
 const SwitchInput = ({
   picsArray,
   setPicsArray,
+  className,
 }: {
   picsArray: { id: string; value: string }[];
   setPicsArray: any;
+  className?: string;
 }) => {
+  const inputRef = useRef<any>(null);
+
   const [isOpenInput, setIsOpenInput] = useState(false);
   const [urlImage, setUrlImage] = useState("");
 
@@ -22,7 +27,6 @@ const SwitchInput = ({
         )
       ) {
         setIsOpenInput(false);
-        setUrlImage("");
       }
     };
 
@@ -35,6 +39,8 @@ const SwitchInput = ({
     if (isOpenInput) {
       document.body.addEventListener("click", handlerClickOnNotTarget);
       window.addEventListener("keydown", handlerKeydown);
+
+      inputRef?.current?.focus();
     } else {
       document.body.removeEventListener("click", handlerClickOnNotTarget);
       window.removeEventListener("keydown", handlerKeydown);
@@ -51,36 +57,68 @@ const SwitchInput = ({
   return (
     <>
       {isOpenInput ? (
-        <div className="flex gap-2 border-[1px] border-orange-700 touchOrCloseTargetEl">
+        <form
+          onSubmit={handleAddUrl}
+          className={
+            "touchOrCloseTargetEl w-full flex gap-[10px] items-center px-[16px] py-[10px] text-fs16 bg-white" +
+            " " +
+            className
+          }
+        >
+          <label
+            htmlFor="urlInput"
+            className="w-[64px] text-fs12 overflow-hidden"
+          >
+            Посилання на фото
+          </label>
+
+          <div className=" relative flex justify-center items-center w-[50px] h-[50px] bg-lilac">
+            {urlImage &&
+              (urlImage.startsWith("https://") ||
+                urlImage.startsWith("http://")) && (
+                <Image
+                  src={urlImage}
+                  alt="event content"
+                  width={50}
+                  height={50}
+                  sizes="(max-width: 768px) 15vw, (max-width: 1280px) 10vw, 5vw"
+                  className="h-full w-full object-cover object-center"
+                />
+              )}
+          </div>
+
+          <input
+            id="urlInput"
+            ref={inputRef}
+            type="text"
+            placeholder="https:// ..."
+            value={urlImage}
+            onChange={(e) => setUrlImage(e.target.value)}
+            className=" self-end flex-[1] h-[30px] px-[8px] text-fs12 border-b-[1px] border-brown-light"
+          />
+
           <button
-            className="block border-[1px] border-orange-950 w-[24px] h-full"
+            className="block  h-[30px] text-brown-light uppercase border-[1px] border-brown-light rounded-[5px]"
+            type="button"
+            onClick={(e) => setUrlImage("")}
+          >
+            clear
+          </button>
+
+          <button
+            className="block w-[30px] h-[30px] ml-auto text-brown-light uppercase border-[1px] border-brown-light rounded-[5px]"
             type="submit"
             onClick={handleAddUrl}
           >
-            +
+            ок
           </button>
-
-          <button
-            className="block border-[1px] border-orange-950 w-[24px] h-full"
-            onClick={() => setIsOpenInput(!isOpenInput)}
-          >
-            -
-          </button>
-
-          {/* надо придумать автофокус для инпута после нажатия добавить */}
-          <input
-            type="text"
-            placeholder="https://abcdef"
-            value={urlImage}
-            onChange={(e) => setUrlImage(e.target.value)}
-          />
-        </div>
+        </form>
       ) : (
         <button
-          className="block w-full border-[1px] border-orange-700 "
+          className={"block w-full" + " " + className}
           onClick={() => setIsOpenInput(!isOpenInput)}
         >
-          Add picture
+          Додати фото
         </button>
       )}
     </>

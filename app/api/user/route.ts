@@ -53,6 +53,7 @@ export async function PATCH(req: Request) {
   const updateData: Record<string, string> = {};
   updateData.nickname = formData.get("nickname") as string;
   updateData.phone = formData.get("phone") as string;
+  updateData.isSubscribed = formData.get("isSubscribed");
   const file: any = formData.get("file");
   const isFileExists: boolean = formData.get("isFileExists");
 
@@ -69,8 +70,10 @@ export async function PATCH(req: Request) {
   try {
     const { _id } = await User.findOne({ email });
     if (_id) {
+      updateData.userEmail = email as string;
+      updateData.userId = _id as string;
+
       updateData.id = _id as string;
-      updateData.owner = email as string;
     } else {
       return Response.json("User not found");
     }
@@ -178,7 +181,7 @@ export async function PATCH(req: Request) {
     let isUserInfoExists;
     try {
       isUserInfoExists = await UserInfo.findOne({
-        owner: updateData.owner,
+        userEmail: updateData.userEmail,
       });
     } catch (error) {
       return Response.json({ error, number: 5 });
@@ -189,16 +192,40 @@ export async function PATCH(req: Request) {
 
       if (isUserInfoExists) {
         const userInfo = await UserInfo.findOneAndUpdate(
-          { owner: updateData.owner },
+          { userEmail: updateData.userEmail },
           { ...updateData },
           { new: true }
         );
 
-        return Response.json({ ...userInfo._doc, ...updateData, ...user._doc });
+        const intermediateUser = {
+          ...userInfo._doc,
+          ...updateData,
+          ...user._doc,
+        };
+
+        delete intermediateUser.emailVerified;
+        delete intermediateUser.userEmail;
+        delete intermediateUser.userId;
+        delete intermediateUser._id;
+        delete intermediateUser.updatedAt;
+
+        return Response.json(intermediateUser);
       } else {
         const userInfo = await UserInfo.create({ ...updateData });
 
-        return Response.json({ ...userInfo._doc, ...updateData, ...user._doc });
+        const intermediateUser = {
+          ...userInfo._doc,
+          ...updateData,
+          ...user._doc,
+        };
+
+        delete intermediateUser.emailVerified;
+        delete intermediateUser.userEmail;
+        delete intermediateUser.userId;
+        delete intermediateUser._id;
+        delete intermediateUser.updatedAt;
+
+        return Response.json(intermediateUser);
       }
     } catch (error) {
       return Response.json({ error, number: 6 });

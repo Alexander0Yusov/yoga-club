@@ -1,34 +1,60 @@
 import React from "react";
+import IconDraggable from "../0_ui/IconDraggable";
+import IconDelete from "../0_ui/IconDelete";
+import Image from "next/image";
 
 const ImagesUrlList = ({
   picsArray,
   setPicsArray,
+  className,
 }: {
   picsArray: { id: string; value: string }[];
   setPicsArray: any;
+  className?: string;
 }) => {
   return (
-    <ul className="flex flex-col gap-2 mb-3 border-[1px] border-orange-950 ">
-      {picsArray.map(({ id, value }, index) => (
-        <li key={id} className=" border-[1px] border-orange-950">
-          <div className="flex justify-between w-full h-[28px] border-[1px] border-orange-950">
-            <p className="h-full overflow-hidden border-[1px] border-orange-700 ">
-              <span>{`${index + 1}. `}</span>
-              <span>{value}</span>
+    <ul className={"flex flex-col gap-[10px] text-fs16" + " " + className}>
+      {picsArray?.length > 0 &&
+        picsArray.map(({ id, value }, index) => (
+          <li
+            key={id}
+            className="flex gap-[12px] justify-between items-center w-full h-[56px] py-[3px] border-[1px] border-orange-950 "
+          >
+            <IconDraggable />
+
+            <p className=" min-w-[20px] text-center border-[1px] border-orange-950">
+              {String(index + 1).padStart(2, "0")}
             </p>
+
+            <div className=" relative flex justify-center items-center w-[50px] h-[50px] bg-lilac">
+              {value &&
+                (value.startsWith("https://") ||
+                  value.startsWith("http://")) && (
+                  <Image
+                    src={value}
+                    alt="event content"
+                    width={50}
+                    height={50}
+                    sizes="(max-width: 768px) 15vw, (max-width: 1280px) 10vw, 5vw"
+                    className="h-full w-full object-cover object-center"
+                  />
+                )}
+            </div>
+
+            <p className="self-end flex-[1] w-[120px] px-[16px] py-[8px] whitespace-nowrap overflow-hidden text-ellipsis border-b-[1px] border-brown-light ">
+              {value}
+            </p>
+
             <button
-              className=" border-[1px] border-orange-700"
+              className=" h-full"
               onClick={() =>
-                setPicsArray((prev: any) =>
-                  prev.filter((el: any) => el.id !== id)
-                )
+                setPicsArray(picsArray.filter((el: any) => el.id !== id))
               }
             >
-              Del
+              <IconDelete />
             </button>
-          </div>
-        </li>
-      ))}
+          </li>
+        ))}
     </ul>
   );
 };

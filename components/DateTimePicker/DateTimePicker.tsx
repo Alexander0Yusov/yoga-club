@@ -1,22 +1,27 @@
 "use client";
-import { format, isValid, parse } from "date-fns";
-import { uk, enUS, de } from "date-fns/locale";
+
+import React, { ChangeEventHandler, useRef, useState, useEffect } from "react";
+
 import FocusTrap from "focus-trap-react";
 import { usePopper } from "react-popper";
-import React, { ChangeEventHandler, useRef, useState, useEffect } from "react";
-import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 
+import { format, isValid, parse } from "date-fns";
+import { uk, enUS, de } from "date-fns/locale";
+
+import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import IconCalendar from "../0_ui/IconCalendar";
 
 export default function DateTimePicker({
-  timeTarget,
-  setTimeTarget,
+  register,
+  setValue,
+  errors,
 }: {
-  timeTarget: string;
-  setTimeTarget: any;
+  register: any;
+  setValue: any;
+  errors: any;
 }) {
   const [selected, setSelected] = useState<Date>();
-  const [inputValue, setInputValue] = useState<string>(timeTarget || "");
   const [isPopperOpen, setIsPopperOpen] = useState(false);
 
   const popperRef = useRef<HTMLDivElement>(null);
@@ -58,57 +63,69 @@ export default function DateTimePicker({
     }
   }, [isPopperOpen, setIsPopperOpen]);
 
-  const closePopper = () => {
-    setIsPopperOpen(false);
-    buttonRef?.current?.focus();
-  };
-
-  const handleButtonClick = () => {
-    setIsPopperOpen(true);
-  };
-
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setInputValue(e.currentTarget.value);
-
     const date = parse(e.currentTarget.value, "y-MM-dd", new Date());
+
     if (isValid(date)) {
       setSelected(date);
-      setTimeTarget(date.toString());
     } else {
       setSelected(undefined);
-      setTimeTarget("");
     }
+
+    return e.currentTarget.value;
   };
 
   const handleDaySelect: SelectSingleEventHandler = (date) => {
     setSelected(date);
-    setTimeTarget(date?.toString() || "");
 
     if (date) {
-      setInputValue(format(date, "y-MM-dd"));
+      setValue("timeTarget", format(date, "y-MM-dd"), {
+        shouldValidate: true,
+      });
       closePopper();
     } else {
-      setInputValue("");
+      setValue("timeTarget", "", {
+        shouldValidate: true,
+      });
     }
   };
 
+  function closePopper() {
+    setIsPopperOpen(false);
+    buttonRef?.current?.focus();
+  }
+
+  function handleCalendarClick() {
+    setIsPopperOpen(true);
+  }
+
   return (
-    <div className="border-[1px] border-orange-950">
-      <div ref={popperRef}>
+    <div className="myRdp border-[1px] border-orange-950">
+      <div ref={popperRef} className=" relative">
         <input
+          {...register("timeTarget")}
+          onChange={(e) =>
+            setValue("timeTarget", handleInputChange(e), {
+              shouldValidate: true,
+            })
+          }
           size={12}
           type="text"
           placeholder={format(new Date(), "y-MM-dd")}
-          value={inputValue}
-          onChange={handleInputChange}
+          className={
+            " w-[230px] h-[40px] px-[16px] border-[1px] border-localbrown rounded-[10px] " +
+            `${errors ? "border-red-600" : "border-localbrown"}`
+          }
         />
+
         <button
           ref={buttonRef}
           type="button"
           aria-label="Pick a date"
-          onClick={handleButtonClick}
+          onClick={handleCalendarClick}
+          className="absolute flex items-center justify-center w-[30px] h-full left-[192px] top-0 border-[1px] border-localbrown"
         >
-          Pick a date
+          <IconCalendar />
         </button>
       </div>
 
@@ -127,7 +144,7 @@ export default function DateTimePicker({
           <div
             tabIndex={-1}
             style={popper.styles.popper}
-            className="dialog-sheet border-[1px] border-orange-950"
+            className="dialog-sheet bg-white border-[1px] border-localbrown"
             {...popper.attributes.popper}
             ref={setPopperElement}
             role="dialog"

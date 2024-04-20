@@ -2,11 +2,11 @@ import mongoose, { Schema, models, model } from "mongoose";
 
 const feedbackSchema = new Schema(
   {
-    owner: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    ownerInfo: {
+    userInfoId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "UserInfo",
     },

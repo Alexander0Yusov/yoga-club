@@ -1,5 +1,6 @@
 import Container from "@/components/0_ui/Container/Container";
 import LinksProfilePage from "@/components/0_ui/LinksProfilePage/LinksProfilePage";
+import SignOutButton from "@/components/0_ui/SignOutButton/SignOutButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,9 +15,7 @@ export default async function ProfileLayout({
 }) {
   return (
     <Container>
-      <button className="block w-[92px] h-[30px] ml-auto mt-[20px] rounded-[10px] border-[1px] border-localbrown text-localbrown">
-        Вихід
-      </button>
+      <SignOutButton />
 
       <h2 className=" mb-[30px] font-philosopher font-bold text-fs60 text-localbrown">
         Ваш профіль

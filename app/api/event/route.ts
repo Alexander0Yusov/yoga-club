@@ -45,3 +45,25 @@ export async function PATCH(req: Request) {
     return Response.json({ error: "Internal Server Error" });
   }
 }
+
+// DELETE
+export async function DELETE(req: Request) {
+  const { id } = await req.json();
+
+  if (!id) {
+    return Response.json({ error: "Missing id parameter" });
+  }
+  mongoose.connect(MONGO_URL as string);
+
+  try {
+    const event: any = await Events.findByIdAndDelete(id);
+
+    if (event) {
+      return Response.json(event);
+    }
+
+    return Response.json({ error: "Event not found" });
+  } catch (error) {
+    return Response.json({ error: "Internal Server Error" });
+  }
+}

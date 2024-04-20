@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ModalWindow } from "../0_ui/ModalWindow/ModalWindow";
 import { useSession } from "next-auth/react";
+import FeedbacksForm from "../FeedbacksForm/FeedbacksForm";
 
 const ButtonOpenFormFeedback = () => {
   const [modalState, setModalState] = useState(false);
@@ -13,25 +14,6 @@ const ButtonOpenFormFeedback = () => {
   };
   const showModal = () => {
     setModalState(true);
-  };
-
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
-    e: any
-  ) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-
-    const res = await (
-      await fetch("/api/feedbacks", {
-        method: "POST",
-        body: formData,
-      })
-    ).json();
-
-    console.log("res", res);
-
-    e.target.reset();
   };
 
   return (
@@ -47,27 +29,7 @@ const ButtonOpenFormFeedback = () => {
 
       {session.status === "authenticated" && (
         <ModalWindow onModalClose={onModalClose} showModal={modalState}>
-          <form
-            onSubmit={handleSubmit}
-            className="border-[1px] border-orange-950"
-          >
-            <label>
-              <p className="">Залиште ваш відгук</p>
-
-              <textarea
-                name="feedback"
-                rows={5}
-                className=" resize-none w-[400px]"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="block border-[1px] border-orange-950"
-            >
-              Send
-            </button>
-          </form>
+          <FeedbacksForm setShowModal={setModalState} />
         </ModalWindow>
       )}
     </>

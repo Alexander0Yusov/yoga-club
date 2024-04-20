@@ -11,7 +11,10 @@ import React from "react";
 
 const Footer2 = () => {
   return (
-    <footer className="w-full h-[170px] pt-[30px] font-mulish text-fs18 bg-[#dfd9dc] border-[1px] border-orange-950">
+    <footer
+      id="footer"
+      className="w-full h-[170px] pt-[30px] font-mulish text-fs18 bg-[#dfd9dc] border-[1px] border-orange-950"
+    >
       <Container className="flex justify-between items-start border-[1px] border-orange-950 ">
         <Logo className=" h-[50px]" />
 
@@ -40,7 +43,7 @@ const Footer2 = () => {
           <ul className="flex gap-[20px] ">
             <li>
               <Link
-                href={"https://www.youtube.com"}
+                href={"https://www.youtube.com/@user-me7xw1wf9x"}
                 target="_blank"
                 rel="noreferrer noopener nofollow"
               >
@@ -49,7 +52,7 @@ const Footer2 = () => {
             </li>
             <li>
               <Link
-                href={"https://www.facebook.com"}
+                href={"https://www.facebook.com/profile.php?id=100017494006022"}
                 target="_blank"
                 rel="noreferrer noopener nofollow"
               >

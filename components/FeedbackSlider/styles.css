@@ -36,3 +36,11 @@
 .swiper-button-prev:after {
   /* display: none; */
 }
+
+.swiper-slide .events,
+.swiper-slide .events {
+  opacity: 50%;
+}
+.swiper-slide-active .events {
+  opacity: 1;
+}

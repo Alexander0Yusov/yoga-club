@@ -3,30 +3,24 @@ import { NextResponse } from "next/server";
 const { TG_API_KEY, TG_CHAT_ID } = process.env;
 
 export const POST = async (req: Request) => {
-  let formData: any;
-  try {
-    formData = await req.formData();
-  } catch (error) {
-    return Response.json(error);
-  }
+  let { name, phone, email, comment } = await req.json();
 
   let message = "<b>Повідомлення з сайту:</b>\n";
 
-  const name = formData.get("name");
   if (name) {
     message += `Ім'я: ${name}\n`;
   }
-  const phone = formData.get("phone");
+
   if (phone) {
     message += `Телефон: ${phone}\n`;
   }
-  const email = formData.get("email");
+
   if (email) {
     message += `Ел. пошта: ${email}\n`;
   }
-  const textarea = formData.get("textarea");
-  if (textarea) {
-    message += `Текст: ${textarea}\n`;
+
+  if (comment) {
+    message += `Текст: ${comment}\n`;
   }
 
   // https://api.telegram.org/bot<TG_API_KEY>/getUpdates

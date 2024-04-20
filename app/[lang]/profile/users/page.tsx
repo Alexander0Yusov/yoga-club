@@ -1,7 +1,12 @@
+import UsersGallery from "@/components/UsersGallery/UsersGallery";
 import React from "react";
 
-const page = () => {
-  return <div>Users page</div>;
+const UsersPage = () => {
+  return (
+    <div>
+      <UsersGallery />
+    </div>
+  );
 };
 
-export default page;
+export default UsersPage;

@@ -6,6 +6,7 @@ const eventsSchema = new Schema(
     timeTarget: { type: String },
     description: { type: String },
     picsArray: [{ value: { type: String } }],
+    defaultImg: { type: Number },
   },
   { timestamps: true, versionKey: false }
 );

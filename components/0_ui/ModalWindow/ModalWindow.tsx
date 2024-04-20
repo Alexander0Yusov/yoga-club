@@ -22,16 +22,16 @@ export const ModalWindow: React.FC<ModalWindowProps> = ({
     <Portal onModalClose={onModalClose} showModal={showModal}>
       <div
         className={
-          `container border-[1px] border-orange-950 relative z-40 my-10 bg-gray-200 px-[10px] pb-8 pt-[60px] md:px-4 xl:w-[1220px] xl:px-6 ` +
+          `container border-[1px] border-lilac rounded-[20px] relative z-40 my-10 bg-[#dfd9dc] px-[10px] pb-8 pt-[60px] md:px-4 xl:w-[1220px] xl:px-6 ` +
           className
         }
       >
         <button
           type="button"
           aria-label={
-            lang === "en"
-              ? "Modal close button"
-              : "Кнопка закриття модального вікна"
+            (lang === "en" && "Modal close button") ||
+            (lang === "uk" && "Кнопка закриття модального вікна") ||
+            "deutch button"
           }
           onClick={onModalClose}
           className="absolute right-[14px] top-[20px] z-20 h-fit w-fit md:right-[26px]"

@@ -21,15 +21,15 @@ export async function POST(req: Request) {
 
   // if (email && admins?.split("|").includes(email)) {
   mongoose.connect(MONGO_URL as string);
-  const formData = await req.formData();
-  const feedbackText = formData.get("feedback");
 
-  const { _id: id } = await UserInfo.findOne({ owner: email });
+  let { text } = await req.json();
+
+  const { _id: id } = await UserInfo.findOne({ userEmail: email });
 
   const newFeedback: any = await Feedback.create({
-    owner: _id,
-    ownerInfo: id,
-    text: feedbackText,
+    userId: _id,
+    userInfoId: id,
+    text,
   });
   return Response.json({ ...newFeedback._doc });
 
@@ -42,12 +42,12 @@ export async function GET() {
 
   const feedbacks: any = await Feedback.find()
     .populate({
-      path: "owner",
+      path: "userId",
       model: "User",
       select: "name image",
     })
     .populate({
-      path: "ownerInfo",
+      path: "userInfoId",
       model: "UserInfo",
       select: "nickname portrait",
     })
@@ -64,4 +64,17 @@ export async function GET() {
   }
 
   return Response.json(null);
+}
+
+// DELETE
+export async function DELETE(req: Request) {
+  // проверить не сможет ли посторонний удалить сделав запрос
+
+  let { _id } = await req.json();
+
+  mongoose.connect(MONGO_URL as string);
+
+  const deletedFeedback: any = await Feedback.findOneAndDelete({ _id });
+
+  return Response.json({ ...deletedFeedback._doc });
 }

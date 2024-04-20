@@ -28,9 +28,10 @@ const config: Config = {
         philosopher: ["var(--font-philosopher)"],
       },
       fontSize: {
+        fs12: ["12px", "1.2"],
         fs16: ["16px", "1.2"],
         fs18: ["18px", "1.2"],
-        lg: ["20px", "1.2"],
+        fs20: ["20px", "1.2"],
         fs24: ["24px", "1.2"],
         xxl: ["32px", "1.2"],
         xxxl: ["40px", "1.2"],

@@ -1,10 +1,8 @@
 import React from "react";
 import EventsItem from "../EventsItem/EventsItem";
 
-const EventsGallery = async () => {
-  const getEvents = await import("../../app/api/events/route");
-
-  const events = await (await getEvents.GET()).json();
+const EventsGallery = async ({ events }: { events: any[] }) => {
+  console.log(events);
 
   return (
     <ul className="flex flex-col w-full gap-[50px]">
@@ -15,14 +13,14 @@ const EventsGallery = async () => {
           title,
           description,
           picsArray,
-          createdAt,
+          defaultImg,
         }: {
           _id: string;
           timeTarget: string;
           title: string;
           description: string;
           picsArray: [{ id: string; value: string }];
-          createdAt: string;
+          defaultImg: number;
         }) => (
           <li key={_id}>
             <EventsItem
@@ -31,6 +29,7 @@ const EventsGallery = async () => {
               title={title}
               description={description}
               picsArray={picsArray}
+              defaultImg={defaultImg}
             />
           </li>
         )

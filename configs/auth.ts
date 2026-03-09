@@ -135,7 +135,7 @@ export const authConfig: AuthOptions = {
 
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
       if (session.user) {
         const sessionUser = session.user as typeof session.user & {
           id: string;
@@ -143,9 +143,21 @@ export const authConfig: AuthOptions = {
           isInBlacklist: boolean;
         };
 
-        sessionUser.id = token.sub || "";
-        sessionUser.isAdmin = Boolean(token.isAdmin);
-        sessionUser.isInBlacklist = Boolean(token.isInBlacklist);
+        const email = session.user.email || user?.email || token?.email;
+
+        sessionUser.id = token?.sub || user?.id || "";
+
+        if (email) {
+          await connectToDatabase();
+
+          const userInfo = await UserInfo.findOne({ userEmail: email });
+
+          sessionUser.isAdmin = Boolean(userInfo?.isAdmin);
+          sessionUser.isInBlacklist = Boolean(userInfo?.isInBlacklist);
+        } else {
+          sessionUser.isAdmin = false;
+          sessionUser.isInBlacklist = false;
+        }
       }
 
       return session;

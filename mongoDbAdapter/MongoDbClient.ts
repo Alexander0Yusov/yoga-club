@@ -1,15 +1,15 @@
 // This approach is taken from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
-import { MongoClient } from "mongodb";
+import { MongoClient, MongoClientOptions } from "mongodb";
 
 if (!process.env.MONGO_URL) {
   throw new Error('Invalid/Missing environment variable: "MONGO_URL"');
 }
 
 const uri = process.env.MONGO_URL;
-const options = {};
+const options: MongoClientOptions = {};
 
-let client;
-let clientPromise: any; // Promise<MongoClient>
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === "development") {
   // In development mode, use a global variable so that the value

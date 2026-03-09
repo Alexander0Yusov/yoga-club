@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node --no-deprecation ./node_modules/i18nexus-cli/bin/index.js pull && node --no-deprecation ./node_modules/next/dist/bin/next dev",
-    "build": "i18nexus pull && next build",
-    "start": "i18nexus pull && next start",
+    "build": "next build",
+    "start": "next start",
+    "translations:pull": "i18nexus pull",
     "lint": "next lint"
   },
   "dependencies": {

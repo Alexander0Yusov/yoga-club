@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, Philosopher, Mulish } from "next/font/google";
 
 import { LocaleT, i18nConfig } from "@/i18nConfig";
 import { dir } from "i18next";
@@ -15,27 +14,6 @@ import Footer from "@/sections/Footer/Footer";
 import "./globals.css";
 import Footer2 from "@/sections/Footer2/Footer2";
 import ButtonToTop from "@/components/ButtonToTop/ButtonToTop";
-
-const inter = Inter({
-  weight: ["400", "700"],
-  display: "swap",
-  variable: "--font-inter",
-  subsets: ["cyrillic", "latin"],
-});
-
-const mulish = Mulish({
-  weight: ["400", "700"],
-  display: "swap",
-  variable: "--font-mulish",
-  subsets: ["cyrillic", "latin"],
-});
-
-const philosopher = Philosopher({
-  weight: ["400", "700"],
-  display: "swap",
-  variable: "--font-philosopher",
-  subsets: ["cyrillic", "latin"],
-});
 
 const i18nNamespaces = ["homePage", "eventsPage"];
 
@@ -64,9 +42,7 @@ export default async function RootLayout({
         locale={lang}
         resources={resources}
       >
-        <body
-          className={`${inter.variable} ${mulish.variable} ${philosopher.variable} relative`}
-        >
+        <body className="relative">
           <MySessionProvider>
             {/* <Header lang={lang} /> */}
             <Header2 lang={lang} />

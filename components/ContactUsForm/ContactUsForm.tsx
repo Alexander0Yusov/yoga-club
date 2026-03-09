@@ -201,7 +201,7 @@ const ContactUsForm = () => {
       </div>
 
       <div className="flex mt-[32px] items-end">
-        <p>* Поля обов'язкові для заповнення</p>
+        <p>* Поля обов&apos;язкові для заповнення</p>
         <button
           disabled={!isValid}
           className="block w-[250px] h-[50px] ml-auto disabled:text-gray-500 bg-brown-light disabled:bg-brown-light-light border-[2px] border-localbrown disabled:border-brown-light  rounded-full "

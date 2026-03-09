@@ -7,6 +7,12 @@ import { getServerSession } from "next-auth";
 
 const { MONGO_URL } = process.env;
 
+const connectToDatabase = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(MONGO_URL as string);
+  }
+};
+
 // POST
 export async function POST(req: Request) {
   let email: any;
@@ -17,10 +23,9 @@ export async function POST(req: Request) {
     return Response.json({ error, number: 1 });
   }
 
-  const { _id } = await User.findOne({ email });
+  await connectToDatabase();
 
-  // if (email && admins?.split("|").includes(email)) {
-  mongoose.connect(MONGO_URL as string);
+  const { _id } = await User.findOne({ email });
 
   let { text } = await req.json();
 
@@ -38,7 +43,7 @@ export async function POST(req: Request) {
 
 // GET ALL
 export async function GET() {
-  mongoose.connect(MONGO_URL as string);
+  await connectToDatabase();
 
   const feedbacks: any = await Feedback.find()
     .populate({
@@ -72,7 +77,7 @@ export async function DELETE(req: Request) {
 
   let { _id } = await req.json();
 
-  mongoose.connect(MONGO_URL as string);
+  await connectToDatabase();
 
   const deletedFeedback: any = await Feedback.findOneAndDelete({ _id });
 

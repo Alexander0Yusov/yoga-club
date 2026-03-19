@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-const clubContactProviderValues = [
+import { entityLifecycleSchema } from "@/modules/_shared/contracts/entityLifecycle";
+
+export const ClubContactTypeSchema = z.enum(["SOCIAL", "PHONE", "EMAIL", "LOCATION"]);
+export const ClubContactProviderSchema = z.enum([
   "TELEGRAM",
   "WHATSAPP",
   "INSTAGRAM",
@@ -10,9 +13,9 @@ const clubContactProviderValues = [
   "TIKTOK",
   "LINKEDIN",
   "OTHER",
-] as const;
+]);
 
-const clubContactLocationDataSchema = z.object({
+export const ClubContactLocationDataSchema = z.object({
   lat: z.number().optional(),
   lng: z.number().optional(),
   city: z.string().optional(),
@@ -21,17 +24,18 @@ const clubContactLocationDataSchema = z.object({
   office: z.string().optional(),
 });
 
-const clubContactBaseSchema = z.object({
-  name: z.string().min(1),
-  value: z.string().min(1),
-  provider: z.enum(clubContactProviderValues),
-  isActive: z.boolean(),
-  landingIndex: z.number().int(),
-});
+const clubContactBaseSchema = z
+  .object({
+    name: z.string().min(1),
+    value: z.string().min(1),
+    provider: ClubContactProviderSchema,
+    landingIndex: z.number().int(),
+  })
+  .extend(entityLifecycleSchema.shape);
 
 const clubContactLocationSchema = clubContactBaseSchema.extend({
   type: z.literal("LOCATION"),
-  locationData: clubContactLocationDataSchema.optional(),
+  locationData: ClubContactLocationDataSchema.optional(),
 });
 
 const clubContactNonLocationSchema = clubContactBaseSchema.extend({

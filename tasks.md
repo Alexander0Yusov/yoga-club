@@ -1,171 +1,84 @@
 # Yoga Club Refactor Roadmap 2026
 
-## Критический аудит текущего состояния
+## Critical Audit
 
-- В репозитории одновременно существуют `app/` и `src/app/`, что ломает единый App Router-контур и создаёт риск расхождения маршрутов.
-- `src/app/[lang]/page.tsx` сейчас является заглушкой, а не серверной композицией SEO-страницы.
-- `middleware.ts` занимается только локализацией и не проверяет роли `ADMIN` / `SUPERADMIN`.
-- `src/shared/api/client.ts` не передаёт `Accept-Language`, не валидирует ответы через Zod и не поддерживает теги для ISR.
-- Доменный контент до сих пор завязан на моках и локальных `app/api/*` маршрутах вместо контрактного REST-слоя от NestJS.
-- В кодовой базе нет отдельного слоя `src/modules` для backend-контрактов, DTO и маппинга Page Props.
-- Swagger API сейчас покрывает только `App`, `Auth`, `Users`, `Security Devices` и `Testing`; доменные сущности Yoga Club в нём пока отсутствуют.
+- `app/` and `src/app/` still coexist, so the App Router source of truth is split.
+- `src/app/[lang]/page.tsx` is still a placeholder instead of a server-rendered SEO entry.
+- `middleware.ts` only handles locale routing and does not enforce RBAC.
+- `src/shared/api/client.ts` did not yet support locale headers, atomic mutations, or soft delete.
+- Domain contracts were missing lifecycle fields, so `isActive` and `deletedAt` were not part of the source of truth.
+- Legacy `app/` routes and old dashboard splits are incompatible with the new flat dashboard strategy.
 
 ## Phase 0: Infrastructure Setup
 
-- [ ] Зафиксировать целевую архитектуру: `src/app/[lang]` как единственный runtime для Next.js App Router.
-- [ ] Удалить зависимость страниц от legacy `app/` и перенести рабочие маршруты в `src/app/[lang]`.
-- [ ] Ввести единый API-клиент с `baseURL = https://yoga-club-back.vercel.app/api`.
-- [ ] Добавить проброс `Accept-Language` из текущего Paraglide-роута во все REST-запросы.
-- [ ] Добавить Zod-валидацию для всех ответов API и локальных mock-репозиториев.
-- [ ] Ввести слой контрактов DTO:
-  - `src/shared/types/api.ts`
-  - `src/shared/types/session.ts`
-  - `src/shared/api/dto.ts`
-  - `src/shared/api/adapters/*`
-- [ ] Подготовить генерацию TypeScript-интерфейсов из Swagger для frontend-слоя.
-- [ ] Ввести `revalidateTag`-совместимую стратегию тегов для всех контентных запросов.
-- [ ] Согласовать базовые теги контента:
-  - `events`
-  - `event`
-  - `reviews`
-  - `sections`
-  - `directions`
-  - `benefits`
-  - `users`
-- [ ] Выделить отдельные mock-репозитории для контента, который ещё не отдан backend'ом.
+- [x] Create `src/modules/_shared/contracts/isoUtcDateTime.ts`.
+- [x] Create `src/modules/_shared/contracts/entityLifecycle.ts`.
+- [x] Update all domain contracts in `src/modules/*/contracts/` to include:
+  - `isActive: boolean`
+  - `deletedAt: isoUtcDateTime | null`
+- [x] Update `UserSchema` to include `viewMode?: "USER" | "ADMIN" | "SUPERADMIN"`.
+- [x] Add `AboutMe` side-by-side contract with `left` / `right` pair logic.
+- [x] Refactor `src/shared/api/client.ts` into an atomic API layer.
+- [x] Add independent mutation methods:
+  - `updateSection`
+  - `updateAboutPair`
+  - `updateEvent`
+- [x] Replace hard delete flows with `softDelete` methods that patch `deletedAt`.
+- [x] Ensure every request sends `Accept-Language`.
+- [x] Filter `GET /users` requests by `deletedAt=null` by default.
+- [ ] Purge legacy `app/` folder after all route groups are moved into `src/app/[lang]/`.
 
-## Phase 1: Hybrid i18n & Data Strategy
+## Contract Rules
 
-- [ ] Использовать Paraglide только для статических UI-строк и URL-routing.
-- [ ] Перенести весь доменный контент на backend `NestJS`:
-  - события
-  - описания
-  - отзывы
-  - записи
-  - профили
-- [ ] Сделать `Accept-Language` обязательным заголовком для всех контентных запросов.
-- [ ] Зафиксировать правило: если endpoint не существует в Swagger, фронтенд использует mock-репозиторий.
-- [ ] Описать маппинг `DTO -> Page Props` для:
-  - `src/app/[lang]/(public)`
-  - `src/app/[lang]/(auth)`
-  - `src/app/[lang]/(user)`
-  - `src/app/[lang]/(admin)`
-- [ ] Обновить `src/shared/api/client.ts`, чтобы он поддерживал:
-  - `headers`
-  - `tags`
-  - `next.revalidate`
-  - нормализованные ошибки
+- All contracts must remain TypeScript-first and Zod-validated.
+- No imports from `entities/` or `models/` are allowed inside contract files.
+- `src/modules/*/contracts` is the source of truth for backend, frontend, and admin flows.
+- Temporal fields must always use `isoUtcDateTime`.
+- No `any` types are allowed in contract definitions.
 
-## Phase 2: Rendering & Admin Overlay Logic
+## Routing & i18n Foundation
 
-- [ ] Перевести все SEO-критичные тексты на Server Components.
-- [ ] Исключить client-side fetching для landing и public content.
-- [ ] Внедрить On-Demand ISR:
-  - `POST`
-  - `PATCH`
-  - `DELETE`
-  - webhook / server action trigger
-- [ ] Определить единый механизм `revalidateTag` после мутаций backend'а.
-- [ ] Сделать `AdminWrapper` на сервере:
-  - проверить `user.role === "ADMIN"`
-  - при успехе отрисовать admin overlay
-  - не ломать SSR для гостей
-- [ ] Добавить inline "Edit" controls поверх статических карточек для админов.
-- [ ] Открытие редактирования выполнять через client-side modal без потери SEO-содержимого.
-- [ ] Разделить права:
-  - гость видит статический контент
-  - админ видит overlay
-  - супер-админ видит расширенные панели управления
-
-## Phase 3: Routing & Directory Structure
-
-- [ ] Перенести все публичные страницы в route groups под `src/app/[lang]/(public)`.
-- [ ] Перенести auth flow в `src/app/[lang]/(auth)`.
-- [ ] Перенести private cabinet в `src/app/[lang]/(user)`.
-- [ ] Перенести panel management в `src/app/[lang]/(admin)`.
-- [ ] Зафиксировать публичные маршруты:
-  - `/`
-  - `/events`
+- Move all routes to `src/app/[lang]/`.
+- Keep Paraglide-js for URL-based language routing and static UI labels only.
+- Add a global language switcher in the header.
+- Remove language persistence from profile/DB logic.
+- Public routing:
+  - `/events/upcoming`
+  - `/events/archive`
   - `/events/[id]`
-  - `/events/archive/[id]`
-- [ ] Зафиксировать private маршруты:
-  - `/account/profile`
-  - `/account/reviews`
-  - `/account/bookings`
-  - `/account/demovideos`
-  - `/account/clients`
-- [ ] Обновить `middleware.ts`, чтобы он был совместим с RBAC и `AdminWrapper`.
-- [ ] Убрать дублирующие legacy-маршруты после миграции.
+- Private routing:
+  - `/account`
+  - `?tab=general`
+  - `?tab=bookings`
+  - `?tab=reviews`
+- Admin routing:
+  - flat CRUD tables
+  - independent modals
+  - trash / restore toggle for superadmins
 
-## Phase 4: Media & SEO 2026
+## Data Integrity & Soft Delete
 
-- [ ] Перевести все изображения на `next/image`.
-- [ ] Использовать локализованные `alt`-теги из backend DB.
-- [ ] Добавить `sizes` для responsive и Retina поведения.
-- [ ] Ввести video facades для YouTube:
-  - lazy-load по клику
-  - без загрузки плеера на первом рендере
-- [ ] Автоматически генерировать JSON-LD:
-  - `Event`
-  - `VideoObject`
-- [ ] Поддержать SEO-метаданные на уровне Server Components и route metadata.
-
-## Phase 5: Auth, RBAC & Account Linking
-
-- [ ] Синхронизировать Google / Facebook OAuth с email/password auth.
-- [ ] Реализовать account linking на backend, чтобы не плодить дубликаты профилей.
-- [ ] Проверить актуальную модель ролей:
-  - `USER`
-  - `ADMIN`
-  - `SUPERADMIN`
-- [ ] Описать server-side guards для protected routes.
-- [ ] Вынести проверку авторизации из UI в серверный слой.
-
-## Phase 6: Swagger Alignment & Verification
-
-- [ ] Сверить frontend DTO с доступными Swagger схемами:
-  - `UserInputDto`
-  - `UserViewDto`
-  - `PaginatedViewDto`
-  - `UpdateUserDto`
-  - `MeViewDto`
-  - `PasswordRecoveryDto`
-  - `ConfirmationCodeDto`
-- [ ] Подготовить недостающие DTO для доменных сущностей Yoga Club.
-- [ ] Проверить, что все frontend-запросы используют только существующие backend route contracts или mock fallback.
-- [ ] Добавить Playwright-проверки:
-  - SEO rendering
-  - auth flows
-  - protected routes
-  - admin overlay
-  - locale switching
-- [ ] Проверить, что `Accept-Language` реально доходит до NestJS API.
+- `GET` requests for users must exclude soft-deleted records by default.
+- `ADMIN` can restore content from trash.
+- `SUPERADMIN` can toggle "Show Deleted Items" in the content manager.
+- `deletedAt` must be the only delete marker used across contracts and API mutations.
+- `isActive` remains the visibility toggle for manual admin control.
 
 ## Finalized Directory Tree
 
 ```txt
 src/
-  modules/
-    events/
-      contracts/
-    users/
-      contracts/
-    sections/
-      contracts/
   app/
     [lang]/
       layout.tsx
-      page.tsx
       (public)/
-        page.tsx
         events/
-          page.tsx
-          [id]/
+          upcoming/
             page.tsx
           archive/
             page.tsx
-            [id]/
-              page.tsx
+          [id]/
+            page.tsx
       (auth)/
         signin/
           page.tsx
@@ -173,86 +86,68 @@ src/
           page.tsx
       (user)/
         account/
-          profile/
-            page.tsx
-          reviews/
-            page.tsx
-          bookings/
-            page.tsx
-          demovideos/
-            page.tsx
-          clients/
-            page.tsx
+          page.tsx
       (admin)/
         dashboard/
           page.tsx
-        sections/
-          page.tsx
         content/
           page.tsx
-  entities/
-    user/
-      model/
-      ui/
-    section/
-      model/
-      ui/
-    practice-benefit/
-      model/
-      ui/
+  modules/
+    _shared/
+      contracts/
+        isoUtcDateTime.ts
+        entityLifecycle.ts
+    users/
+      contracts/
+    sections/
+      contracts/
+    events/
+      contracts/
+    about-me/
+      contracts/
+    club-contact/
+      contracts/
+    my-event/
+      contracts/
     yoga-direction/
-      model/
-      ui/
-  features/
-    auth/
-    admin-overlay/
-    profile-edit/
-    content-editing/
-    language-switcher/
-    event-registration/
-  widgets/
-    header/
-    footer/
-    hero/
-    landing-sections/
-    user-panel/
-    admin-panel/
+      contracts/
+    our-service/
+      contracts/
+    feedback/
+      contracts/
+    practice-benefit/
+      contracts/
+    demo-video/
+      contracts/
+    hero-intro/
+      contracts/
   shared/
     api/
+      client.ts
       mocks/
     config/
     lib/
-    mock/
     types/
     ui/
     utils/
+  entities/
+    user/
+    section/
+    practice-benefit/
+    yoga-direction/
+  features/
+    admin-overlay/
+    content-editing/
+    language-switcher/
+  widgets/
+    header/
+    footer/
+    landing-sections/
 ```
 
-## Swagger / Current Codebase Gaps
+## Swagger / Codebase Gaps
 
-- Swagger exposes only:
-  - `GET /api`
-  - auth endpoints
-  - `Users` / `SA users`
-  - `Security Devices`
-  - `Testing`
-- Swagger does not currently expose:
-  - `events`
-  - `feedbacks`
-  - `archive`
-  - `content editing`
-  - `admin overlay`
-  - `revalidation hooks`
-  - `account linking`
-  - `locale-aware content payloads`
-- Current frontend still has local REST routes that are not represented in Swagger:
-  - `/api/events`
-  - `/api/event`
-  - `/api/feedbacks`
-  - `/api/myfeedbacks`
-  - `/api/user`
-  - `/api/userCurrent`
-  - `/api/usersAll`
-  - `/api/telegram`
-- Current frontend still has a placeholder locale page instead of a server-rendered public landing shell.
-- Current frontend lacks a verified frontend-to-backend contract layer for domain DTOs and page props.
+- Swagger currently only exposes auth/users/security/testing flows.
+- Domain endpoints for events, feedback, content editing, restore flows, and account linking are still missing.
+- Local `app/api/*` routes are legacy and should be removed once backend contracts are wired everywhere.
+- `AdminWrapper` and the flat dashboard still need to be implemented on top of the new contracts.

@@ -1,7 +1,9 @@
-export default function LangPage() {
-  return (
-    <main>
-      <h1>Yoga Club</h1>
-    </main>
-  );
+import LandingSections from "@/widgets/landing-sections/LandingSections";
+
+export default function LangPage({
+  params,
+}: {
+  params: { lang: string };
+}) {
+  return <LandingSections lang={params.lang} />;
 }

@@ -32,7 +32,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-    })
+    }),
   );
 }
 
@@ -41,7 +41,7 @@ if (FACEBOOK_CLIENT_ID && FACEBOOK_CLIENT_SECRET) {
     FacebookProvider({
       clientId: FACEBOOK_CLIENT_ID,
       clientSecret: FACEBOOK_CLIENT_SECRET,
-    })
+    }),
   );
 }
 
@@ -58,6 +58,7 @@ authProviders.push(
       },
       password: { label: "Password", type: "password", required: true },
     },
+
     async authorize(credentials) {
       const email = credentials?.email?.trim();
       const password = credentials?.password;
@@ -88,7 +89,7 @@ authProviders.push(
         isInBlacklist: Boolean(userInfoForSession?.isInBlacklist),
       } as User_for_type;
     },
-  })
+  }),
 );
 
 export const authConfig: AuthOptions = {
@@ -111,6 +112,7 @@ export const authConfig: AuthOptions = {
 
       return true;
     },
+
     async jwt({ token, user }) {
       if (!token.email && user?.email) {
         token.email = user.email;
@@ -135,6 +137,7 @@ export const authConfig: AuthOptions = {
 
       return token;
     },
+
     async session({ session, token, user }) {
       if (session.user) {
         const sessionUser = session.user as typeof session.user & {

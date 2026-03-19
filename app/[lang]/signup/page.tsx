@@ -1,25 +1,25 @@
-import Link from "next/link";
-
 import GoogleButton from "@/components/GoogleButton/GoogleButton";
 import SignupForm from "@/components/SignupForm/SignupForm";
 
 import { LocaleT } from "@/i18nConfig";
+import { PanelSignForm } from "../../../components/PanelSignForm/PanelSignForm";
+import { TogglerSignMode } from "../../../components/ToggleSignMode/ToggleSignMode";
+import { DividerLine } from "../../../components/DividerLine/DividerLine";
 
 const RegisterPage = ({ params: { lang } }: { params: { lang: LocaleT } }) => {
   return (
-    <div className="py-[20px]">
-      <h2 className="text-center">Sign Up</h2>
+    // рамка формы для регистрации
+    <PanelSignForm>
+      <TogglerSignMode lang={lang} />
+
+      <div className="h-[0px] mt-[10px] mb-[30px] border-t-[1px] border-[#C57665]" />
 
       <SignupForm lang={lang} />
 
-      <p className=" text-center my-[20px]">Or Sign Up with provider</p>
+      <DividerLine />
 
       <GoogleButton />
-
-      <Link className="block text-center mt-4" href={`/${lang}/signin`}>
-        Go to Sign In
-      </Link>
-    </div>
+    </PanelSignForm>
   );
 };
 

@@ -14,6 +14,7 @@ import Footer from "@/sections/Footer/Footer";
 import "./globals.css";
 import Footer2 from "@/sections/Footer2/Footer2";
 import ButtonToTop from "@/components/ButtonToTop/ButtonToTop";
+import { WindowBlockWithVerticalParams } from "../../components/0_ui/WindowBlockWithVerticalProps/WindowBlockWithVerticalProps";
 
 const i18nNamespaces = ["homePage", "eventsPage"];
 
@@ -45,12 +46,16 @@ export default async function RootLayout({
         <body className="relative">
           <MySessionProvider>
             {/* <Header lang={lang} /> */}
-            <Header2 lang={lang} />
+            <WindowBlockWithVerticalParams>
+              <Header2 lang={lang} />
 
-            <main className="flex flex-col items-center justify-between font-mulish ">
-              {children}
-            </main>
-            <Footer2 />
+              {/* flex-grow говорит - отдай все пустое место мне */}
+              <main className="flex flex-grow flex-col items-center justify-between font-mulish border border-yellow-500">
+                {children}
+              </main>
+
+              <Footer2 />
+            </WindowBlockWithVerticalParams>
 
             {/* <Footer /> */}
 

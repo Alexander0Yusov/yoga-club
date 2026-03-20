@@ -13,6 +13,16 @@ const userInfoSchema = new Schema(
     phone: { type: String, default: "" },
     isSubscribed: { type: Boolean, default: false },
 
+    role: {
+      type: String,
+      enum: ["USER", "ADMIN", "SUPERADMIN"],
+      default: "USER",
+    },
+    viewMode: {
+      type: String,
+      enum: ["USER", "ADMIN", "SUPERADMIN"],
+      default: "USER",
+    },
     isAdmin: { type: Boolean, default: false },
     isInBlacklist: { type: Boolean, default: false },
   },

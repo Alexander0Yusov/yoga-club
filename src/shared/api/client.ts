@@ -83,6 +83,18 @@ export interface UpdateEventInput {
   locale?: string;
 }
 
+export interface UpdateUserViewModeInput {
+  id?: string;
+  userEmail?: string;
+  viewMode: "USER" | "ADMIN" | "SUPERADMIN";
+  locale?: string;
+}
+
+export interface UpdateUserBlacklistInput {
+  userEmail: string;
+  isInBlacklist: boolean;
+}
+
 export function updateSection<T = SectionContract>({
   id,
   data,
@@ -119,6 +131,56 @@ export function updateEvent<T = EventContract>({
     method: "PATCH",
     locale,
     body: data,
+  });
+}
+
+export function updateUserViewMode<T = unknown>({
+  id,
+  userEmail,
+  viewMode,
+  locale: _locale,
+}: UpdateUserViewModeInput): Promise<T> {
+  const payload: { userId?: string; userEmail?: string; viewMode: "USER" | "ADMIN" | "SUPERADMIN" } =
+    { viewMode };
+
+  if (id) {
+    payload.userId = id;
+  }
+
+  if (userEmail) {
+    payload.userEmail = userEmail;
+  }
+
+  return fetch("/api/usersAll", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Role update failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
+  });
+}
+
+export function updateUserBlacklist<T = unknown>({
+  userEmail,
+  isInBlacklist,
+}: UpdateUserBlacklistInput): Promise<T> {
+  return fetch("/api/usersAll", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userEmail,
+      isInBlacklist,
+    }),
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Blacklist update failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
   });
 }
 

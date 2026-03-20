@@ -33,14 +33,51 @@ export async function GET() {
 
 // PATCH
 export async function PATCH(req: Request) {
-  const { userEmail, isInBlacklist: isInBlacklist_ } = await req.json();
+  const payload = (await req.json()) as {
+    userEmail?: string;
+    isInBlacklist?: boolean;
+    userId?: string;
+    viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+  };
 
   mongoose.connect(process.env.MONGO_URL as string);
 
-  const { isInBlacklist }: any = await UserInfo.findOneAndUpdate(
-    { userEmail },
-    { isInBlacklist: isInBlacklist_ }
-  );
+  if ((payload.userId || payload.userEmail) && payload.viewMode) {
+    const isAdmin =
+      payload.viewMode === "ADMIN" || payload.viewMode === "SUPERADMIN";
+    const query = payload.userId
+      ? { userId: payload.userId }
+      : { userEmail: payload.userEmail };
 
-  return Response.json({ isInBlacklist });
+    const updated = await UserInfo.findOneAndUpdate(
+      query,
+      { isAdmin, role: payload.viewMode, viewMode: payload.viewMode },
+      { new: true }
+    );
+
+    return Response.json({
+      userId: payload.userId,
+      userEmail: payload.userEmail,
+      viewMode: payload.viewMode,
+      isAdmin: updated?.isAdmin ?? isAdmin,
+    });
+  }
+
+  if (payload.userEmail && typeof payload.isInBlacklist === "boolean") {
+    const updated = await UserInfo.findOneAndUpdate(
+      { userEmail: payload.userEmail },
+      { isInBlacklist: payload.isInBlacklist },
+      { new: true }
+    );
+
+    return Response.json({
+      userEmail: payload.userEmail,
+      isInBlacklist: updated?.isInBlacklist ?? payload.isInBlacklist,
+    });
+  }
+
+  return Response.json(
+    { error: "Invalid payload for usersAll PATCH" },
+    { status: 400 }
+  );
 }

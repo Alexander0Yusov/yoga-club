@@ -151,3 +151,9 @@ src/
 - Domain endpoints for events, feedback, content editing, restore flows, and account linking are still missing.
 - Local `app/api/*` routes are legacy and should be removed once backend contracts are wired everywhere.
 - `AdminWrapper` and the flat dashboard still need to be implemented on top of the new contracts.
+
+## Rollback Reality Sync
+
+- [ ] Admin Checkbox ("Assign Admin") in users list is implemented and bound to role mutation.
+- [ ] Entity editing modals in `features/` or `shared/ui/` are restored.
+- [ ] Global feedback soft hide/restore flow is implemented end-to-end.

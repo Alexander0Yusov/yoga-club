@@ -1,17 +1,37 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
+
 import UsersItem from "../UsersItem/UsersItem";
+import useStore from "@/store/a_store";
+
+type UserRow = {
+  _id: string;
+  createdAt: string;
+  image: string;
+  portrait: string;
+  name: string;
+  nickname: string;
+  phone: string;
+  email: string;
+  isAdmin?: boolean;
+  isSubscribed: boolean;
+  isInBlacklist: boolean;
+};
 
 const UsersGallery = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const user = useStore((state) => state.user);
+  const isSuperAdmin =
+    user?.email === "yusovsky2@gmail.com" ||
+    user?.originalRole === "SUPERADMIN";
 
   useEffect(() => {
     const getUsers = async () => {
       const result = await fetch("/api/usersAll");
 
       if (result.ok) {
-        const res = await result.json();
+        const res = (await result.json()) as UserRow[];
         setUsers(res);
       }
     };
@@ -20,76 +40,82 @@ const UsersGallery = () => {
   }, []);
 
   return (
-    <table className="table-auto w-full my-[20px]">
-      <thead>
-        <tr className=" h-[40px]">
-          <th>№</th>
-          <th>Дата реєстрації</th>
-          <th>Фото</th>
-          <th>Аватар</th>
-          <th>Ім&apos;я</th>
-          <th>Ім&apos;я аватара</th>
-          <th>Номер телефону</th>
-          <th>Електронна пошта</th>
-          <th>Підписка</th>
-          <th>Ч. список</th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map(
-          (
-            {
-              _id,
-              createdAt,
-              image,
-              portrait,
-              name,
-              nickname,
-              phone,
-              email,
-              isSubscribed,
-              isInBlacklist,
-            },
-            index
-          ) => (
-            <UsersItem
-              key={_id}
-              num={index}
-              createdAt={createdAt}
-              image={image}
-              portrait={portrait}
-              name={name}
-              nickname={nickname}
-              phone={phone}
-              email={email}
-              isSubscribed={isSubscribed}
-              isInBlacklist={isInBlacklist}
-            />
-          )
-        )}
-      </tbody>
-    </table>
+    <div className="my-[20px] overflow-x-auto">
+      <table className="w-full table-fixed">
+        <colgroup>
+          <col style={{ width: "44px" }} />
+          <col style={{ width: "120px" }} />
+          <col style={{ width: "70px" }} />
+          <col style={{ width: "70px" }} />
+          <col style={{ width: "170px" }} />
+          <col style={{ width: "160px" }} />
+          <col style={{ width: "145px" }} />
+          <col style={{ width: "220px" }} />
+          <col style={{ width: "100px" }} />
+          {isSuperAdmin && <col style={{ width: "120px" }} />}
+          <col style={{ width: "110px" }} />
+        </colgroup>
+
+        <thead>
+          <tr className="h-[40px]">
+            <th>No</th>
+            <th>Created</th>
+            <th>Photo</th>
+            <th>Avatar</th>
+            <th>
+              <div style={{ resize: "horizontal", overflow: "auto" }}>Name</div>
+            </th>
+            <th>Nickname</th>
+            <th>Phone</th>
+            <th>
+              <div style={{ resize: "horizontal", overflow: "auto" }}>Email</div>
+            </th>
+            <th>Subscribed</th>
+            {isSuperAdmin && <th>Роль</th>}
+            <th>Blacklist</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {users.map(
+            (
+              {
+                _id,
+                createdAt,
+                image,
+                portrait,
+                name,
+                nickname,
+                phone,
+                email,
+                isAdmin,
+                isSubscribed,
+                isInBlacklist,
+              },
+              index
+            ) => (
+              <UsersItem
+                key={_id}
+                userId={_id}
+                num={index}
+                createdAt={createdAt}
+                image={image}
+                portrait={portrait}
+                name={name}
+                nickname={nickname}
+                phone={phone}
+                email={email}
+                isAdmin={Boolean(isAdmin)}
+                isSubscribed={isSubscribed}
+                isInBlacklist={isInBlacklist}
+                showRoleColumn={isSuperAdmin}
+              />
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 export default UsersGallery;
-
-// let obj = {
-//   createdAt: "2024-01-27T04:24:54.230Z",
-//   email: "yusovsky2@gmail.com",
-//   emailVerified: null,
-//   image:
-//     "https://lh3.googleusercontent.com/a/ACg8ocIlz_EqTRgcg8u6_LHFZvni52aYSxIZd_lDJ8g1Ii7D=s96-c",
-//   isAdmin: false,
-//   isInBlacklist: false,
-//   isSubscribed: true,
-//   name: "Александр Юсов",
-//   nickname: "Вітя",
-//   phone: "",
-//   portrait:
-//     "https://res.cloudinary.com/dwgi8qlph/image/upload/v1706330171/yoga-club/avatars/65930799b738693fbe86bb78.jpg",
-//   updatedAt: "2024-01-27T04:36:11.633Z",
-//   userEmail: "yusovsky2@gmail.com",
-//   userId: "65930799b738693fbe86bb78",
-//   _id: "65930799b738693fbe86bb78",
-// };

@@ -3,15 +3,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-
+import {
+  Controller,
+  SubmitHandler,
+  type Resolver,
+  useForm,
+} from "react-hook-form";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
 import Image from "next/image";
+import toast from "react-hot-toast";
+
 import ChevronDown from "../0_ui/ChevronDown";
 import useStore from "@/store/a_store";
-import toast from "react-hot-toast";
+import { updateUserViewMode } from "@/shared/api/client";
+
+type ViewMode = "USER" | "ADMIN" | "SUPERADMIN";
 
 type FormValues = {
   nickname: string;
@@ -23,60 +30,65 @@ const schema = yup.object({
   nickname: yup
     .string()
     .trim()
-    .transform((originalValue) => {
-      return originalValue === "" ? undefined : originalValue;
-    })
-    .min(2, "Мінімум 2 символи")
-    .max(50, "Максимум 50 символів"),
-
+    .transform((value) => (value === "" ? undefined : value))
+    .min(2, "Minimum 2 characters")
+    .max(50, "Maximum 50 characters"),
   phone: yup
     .string()
     .trim()
-    .transform((originalValue) => {
-      return originalValue === "" ? undefined : originalValue;
-    })
-    .matches(RegExp("^\\+.*$"), "Має починатися з +")
-    .min(12, "Мін 11 цифр")
-    .matches(RegExp("^\\+\\d*$"), "Приймає лише цифри")
-    .max(13, "Макс 12 цифр"),
-
+    .transform((value) => (value === "" ? undefined : value))
+    .matches(RegExp("^\\+.*$"), "Must start with +")
+    .min(12, "Minimum 11 digits")
+    .matches(RegExp("^\\+\\d*$"), "Digits only after +")
+    .max(13, "Maximum 12 digits"),
   isSubscribed: yup.boolean().oneOf([true, false]),
 });
 
 const ProfileForm = () => {
   const session = useSession();
   const router = useRouter();
-
-  const { user, setUser } = useStore();
+  const { user, setUser, setViewMode } = useStore();
 
   const [portrait, setPortrait] = useState<string>("");
-  const [file, setFile] = useState<any>(null);
-
-  const filePicker: React.LegacyRef<HTMLInputElement> | undefined =
-    useRef(null);
-
-  console.log(88, user);
+  const [file, setFile] = useState<File | null>(null);
+  const filePicker = useRef<HTMLInputElement>(null);
+  const loadedCurrentUserRef = useRef(false);
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
       router.push("/");
     }
-  }, [session.status]);
+  }, [session.status, router]);
 
   useEffect(() => {
-    const changerFormatFile = () => {
-      const reader = new FileReader();
-      if (file !== null) {
-        reader?.readAsDataURL(file);
-        reader.onload = () => {
-          setPortrait(reader.result as string);
-        };
+    const loadCurrentUser = async () => {
+      const response = await fetch("/api/userCurrent");
+      if (!response.ok) {
+        return;
+      }
+
+      const currentUser = await response.json();
+      if (currentUser) {
+        setUser(currentUser);
       }
     };
 
-    if (file) {
-      changerFormatFile();
+    if (session.status === "authenticated" && !loadedCurrentUserRef.current) {
+      loadedCurrentUserRef.current = true;
+      void loadCurrentUser();
     }
+  }, [session.status, setUser]);
+
+  useEffect(() => {
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setPortrait(reader.result as string);
+    };
   }, [file]);
 
   const {
@@ -88,50 +100,49 @@ const ProfileForm = () => {
     reset,
   } = useForm<FormValues>({
     defaultValues: {
-      nickname: user?.nickname === "" ? user?.nickname : user?.nickname,
+      nickname: user?.nickname,
       phone: user?.phone,
       isSubscribed: user?.isSubscribed,
     },
     shouldFocusError: false,
     mode: "all",
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema) as Resolver<FormValues>,
   });
 
   useEffect(() => {
     setValue("nickname", user?.nickname === "" ? user?.name : user?.nickname);
     setValue("phone", user?.phone);
     setValue("isSubscribed", user?.isSubscribed);
-  }, [user?.nickname, user?.phone, user?.isSubscribed]);
+  }, [user?.nickname, user?.name, user?.phone, user?.isSubscribed, setValue]);
 
   const imageChangeHandler: React.ChangeEventHandler<HTMLInputElement> = (
-    e
+    e,
   ) => {
     const files = e.target.files || null;
-    files && files.length > 0 && setFile(files[0]);
+    if (files && files.length > 0) {
+      setFile(files[0]);
+    }
   };
 
   const handlerSubmit: SubmitHandler<FormValues> = async (data) => {
     const formData = new FormData();
-
     formData.append(
       "nickname",
-      data.nickname === undefined ? "" : data.nickname
+      data.nickname === undefined ? "" : data.nickname,
     );
-
     formData.append("phone", data.phone === undefined ? "" : data.phone);
-
-    formData.append("isSubscribed", data.isSubscribed as any);
+    formData.append("isSubscribed", String(data.isSubscribed));
 
     reset();
 
     if (file) {
-      formData.append("isFileExists", true as any);
+      formData.append("isFileExists", "true");
       formData.append("file", file);
       setFile(null);
       setPortrait("");
     }
 
-    const userPatchPromise = new Promise(async (resolve: any, reject) => {
+    const userPatchPromise = new Promise<void>(async (resolve, reject) => {
       const result = await fetch("/api/user", {
         method: "PATCH",
         body: formData,
@@ -141,35 +152,54 @@ const ProfileForm = () => {
         const userInfo = await result.json();
         setUser(userInfo);
         resolve();
-      } else reject();
+      } else {
+        reject(new Error("Failed to save profile"));
+      }
     });
 
-    await toast.promise(
-      userPatchPromise,
-      {
-        loading: "Триває збереження...",
-        success: "Успішно збережено",
-        error: "Помилка збереження",
-      },
-      {
-        success: {
-          duration: 2500,
-        },
-        error: {
-          duration: 4000,
-        },
-      }
-    );
+    await toast.promise(userPatchPromise, {
+      loading: "Saving...",
+      success: "Saved",
+      error: "Save failed",
+    });
+  };
+
+  const isSuperAdmin =
+    user?.email === "yusovsky2@gmail.com" ||
+    user?.originalRole === "SUPERADMIN";
+
+  const handleViewModeChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const nextViewMode = event.target.value as ViewMode;
+
+    if (!user?.email) {
+      toast.error("User email is required");
+      return;
+    }
+
+    try {
+      await updateUserViewMode({
+        userEmail: user.email,
+        viewMode: nextViewMode,
+      });
+      setViewMode(nextViewMode);
+      setUser({ viewMode: nextViewMode });
+      toast.success("View mode updated");
+      window.location.reload();
+    } catch {
+      toast.error("Failed to update view mode");
+    }
   };
 
   return (
     user && (
       <>
-        <div className="flex items-center pb-[30px] border-b-[1px] border-lilac">
-          <p className="w-[323px] text-cadetblue">Фото профілю</p>
+        <div className="flex items-center border-b-[1px] border-lilac pb-[30px]">
+          <p className="w-[323px] text-cadetblue">Profile photo</p>
           <div
             id="thumb"
-            className="relative border-[1px] w-[70px] h-[70px] rounded-full overflow-hidden"
+            className="relative h-[70px] w-[70px] overflow-hidden rounded-full border-[1px]"
           >
             {(portrait || user.portrait || user.image) && (
               <Image
@@ -183,65 +213,58 @@ const ProfileForm = () => {
           </div>
           <button
             type="button"
-            className="flex w-[40px] h-[40px] ml-auto justify-center items-center "
-            onClick={() => {
-              filePicker.current?.click();
-            }}
+            className="ml-auto flex h-[40px] w-[40px] items-center justify-center"
+            onClick={() => filePicker.current?.click()}
           >
-            <ChevronDown className=" w-[20px]" />
+            <ChevronDown className="w-[20px]" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(handlerSubmit)} className="">
-          <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
-            <span className="w-[323px] text-cadetblue">{"Ім'я"}</span>
+        <form onSubmit={handleSubmit(handlerSubmit)}>
+          <label className="flex h-[73px] items-center border-b-[1px] border-lilac">
+            <span className="w-[323px] text-cadetblue">Name</span>
             <input
               {...register("nickname")}
               onChange={(e) =>
                 setValue("nickname", e.target.value, { shouldValidate: true })
               }
-              className=" w-[300px] px-[4px]"
+              className="w-[300px] px-[4px]"
               type="text"
               placeholder="Name"
             />
             {errors.nickname && (
-              <p className=" ml-[8px] text-red-600">
-                {errors.nickname.message}
-              </p>
+              <p className="ml-[8px] text-red-600">{errors.nickname.message}</p>
             )}
           </label>
 
-          <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
-            <span className="w-[323px] text-cadetblue">Телефон</span>
+          <label className="flex h-[73px] items-center border-b-[1px] border-lilac">
+            <span className="w-[323px] text-cadetblue">Phone</span>
             <input
               {...register("phone")}
               onChange={(e) =>
                 setValue("phone", e.target.value, { shouldValidate: true })
               }
-              className=" w-[300px] px-[4px]"
+              className="w-[300px] px-[4px]"
               type="text"
               placeholder="+380991234567"
             />
             {errors.phone && (
-              <p className=" ml-[8px] text-red-600">{errors.phone.message}</p>
+              <p className="ml-[8px] text-red-600">{errors.phone.message}</p>
             )}
           </label>
 
-          <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
-            <span className="w-[323px] text-cadetblue">Електронна пошта</span>
+          <label className="flex h-[73px] items-center border-b-[1px] border-lilac">
+            <span className="w-[323px] text-cadetblue">Email</span>
             <input
-              className=" appearance-none text-gray-900 "
+              className="appearance-none text-gray-900"
               type="text"
               placeholder={user.email}
-              disabled={true}
+              disabled
             />
           </label>
 
-          <label className="cursor-pointer flex items-center h-[73px] border-b-[1px] border-lilac ">
-            <span className="w-[323px] text-cadetblue">
-              Отримувати повідомлення
-            </span>
-
+          <label className="flex h-[73px] cursor-pointer items-center border-b-[1px] border-lilac">
+            <span className="w-[323px] text-cadetblue">Receive updates</span>
             <Controller
               name="isSubscribed"
               control={control}
@@ -249,21 +272,35 @@ const ProfileForm = () => {
               render={({
                 field,
               }: {
-                field: { value: boolean; onChange: Function };
+                field: { value: boolean; onChange: (checked: boolean) => void };
               }) => (
                 <input
-                  onChange={(e) =>
-                    field.onChange(e.target.checked, { shouldValidate: true })
-                  }
+                  onChange={(e) => field.onChange(e.target.checked)}
                   type="checkbox"
-                  checked={String(field.value) === "true" ? true : false}
-                  className=" cursor-pointer "
+                  checked={Boolean(field.value)}
+                  className="cursor-pointer"
                 />
               )}
             />
           </label>
 
-          {/*Fileinput is hidden */}
+          {isSuperAdmin && (
+            <label className="flex items-center h-[73px] border-b-[1px] border-lilac">
+              <span className="w-[323px] text-cadetblue text-[18px]">
+                View Mode
+              </span>
+              <select
+                value={user?.viewMode || user?.role || "USER"}
+                onChange={handleViewModeChange}
+                className="h-[40px] w-[300px] rounded-[10px] border-[1px] border-localbrown bg-white px-[10px] text-localbrown"
+              >
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="SUPERADMIN">SUPERADMIN</option>
+              </select>
+            </label>
+          )}
+
           <input
             name="file"
             className="hidden"
@@ -275,9 +312,9 @@ const ProfileForm = () => {
 
           <button
             type="submit"
-            className="block w-[92px] h-[30px] mx-auto mt-[20px] rounded-[10px] border-[1px] border-localbrown text-localbrown"
+            className="mx-auto mt-[20px] block h-[30px] w-[92px] rounded-[10px] border-[1px] border-localbrown text-localbrown"
           >
-            Зберегти
+            Save
           </button>
         </form>
       </>

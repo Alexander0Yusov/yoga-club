@@ -1,80 +1,72 @@
 import { authConfig } from "@/configs/auth";
 import { User } from "@/mongoose/models/User";
+import { UserInfo } from "@/mongoose/models/UserInfo";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 
-import { UserInfo } from "@/mongoose/models/UserInfo";
+const { MONGO_URL, admins } = process.env;
 
-// GET
+type UserRole = "USER" | "ADMIN" | "SUPERADMIN";
+
+function isSuperAdminByEmail(email: string): boolean {
+  return admins?.split("|").includes(email) ?? false;
+}
+
+function toRoleByEmail(email: string): UserRole {
+  return isSuperAdminByEmail(email) ? "SUPERADMIN" : "USER";
+}
+
+function toIsAdminByRole(role: UserRole): boolean {
+  return role === "ADMIN" || role === "SUPERADMIN";
+}
+
 export async function GET() {
-  mongoose.connect(process.env.MONGO_URL as string);
+  mongoose.connect(MONGO_URL as string);
 
   const session = await getServerSession(authConfig);
   const email = session?.user?.email;
 
-  if (email) {
-    const isUserInfoExists = await UserInfo.findOne({ userEmail: email });
-
-    if (isUserInfoExists) {
-      // это можно через популейт выполнить, изменив формат ответа
-      const sessionDataPromise: any = User.findOne({ email });
-      const userInfoDataPromise = UserInfo.findOne({ userEmail: email });
-
-      const [sessionData, userInfoData] = await Promise.all([
-        sessionDataPromise,
-        userInfoDataPromise,
-      ]);
-
-      const result = { ...userInfoData._doc, ...sessionData._doc };
-
-      delete result._id;
-      delete result.userEmail;
-      delete result.userId;
-      delete result.emailVerified;
-      delete result.updatedAt;
-
-      return Response.json(result);
-    } else {
-      const sessionData = await User.findOne({ email });
-
-      const userInfoData = await UserInfo.create({
-        userId: sessionData._doc._id,
-        userEmail: email,
-      });
-
-      const result = { ...userInfoData._doc, ...sessionData._doc };
-
-      delete result._id;
-      delete result.userEmail;
-      delete result.userId;
-      delete result.emailVerified;
-      delete result.updatedAt;
-
-      return Response.json(result);
-    }
-  } else {
+  if (!email) {
     return Response.json(null);
   }
 
-  // if (email) {
-  //   const isUserInfoExists = await UserInfo.findOne({ owner: email });
+  const sessionData = await User.findOne({ email });
+  if (!sessionData) {
+    return Response.json(null);
+  }
 
-  //   if (isUserInfoExists) {
-  //     const sessionDataPromise = User.findOne({ email });
-  //     const userInfoDataPromise = UserInfo.findOne({ owner: email });
+  const forcedRole = toRoleByEmail(email);
+  const shouldBeAdmin = toIsAdminByRole(forcedRole);
 
-  //     const [sessionData, userInfoData] = await Promise.all([
-  //       sessionDataPromise,
-  //       userInfoDataPromise,
-  //     ]);
+  let userInfo = await UserInfo.findOne({ userEmail: email });
 
-  //     return Response.json({ ...userInfoData._doc, ...sessionData._doc });
-  //   } else {
-  //     const sessionData = await User.findOne({ email });
+  if (!userInfo) {
+    userInfo = await UserInfo.create({
+      userId: sessionData._doc._id,
+      userEmail: email,
+      role: forcedRole,
+      viewMode: forcedRole,
+      isAdmin: shouldBeAdmin,
+    });
+  } else if (forcedRole === "SUPERADMIN" && userInfo.role !== "SUPERADMIN") {
+    userInfo = await UserInfo.findOneAndUpdate(
+      { userEmail: email },
+      {
+        role: "SUPERADMIN",
+        viewMode: "SUPERADMIN",
+        isAdmin: true,
+      },
+      { new: true }
+    );
+  }
 
-  //     return Response.json({ ...sessionData._doc });
-  //   }
-  // } else {
-  //   return Response.json(null);
-  // }
+  const result = { ...userInfo?._doc, ...sessionData._doc };
+
+  delete result._id;
+  delete result.userEmail;
+  delete result.userId;
+  delete result.emailVerified;
+  delete result.updatedAt;
+
+  return Response.json(result);
 }

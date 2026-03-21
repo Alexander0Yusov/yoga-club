@@ -7,6 +7,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { UserInfo } from "@/mongoose/models/UserInfo";
 
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
 // GET
 // export async function GET(email: any) {
@@ -28,8 +29,19 @@ import crypto from "crypto";
 export async function POST(req: Request) {
   const body = await req.json();
   mongoose.connect(process.env.MONGO_URL as string);
-  const user: any = await User.create(body);
-  return Response.json(user);
+  const hashedPassword = await bcrypt.hash(body.password, 10);
+  const existingUser = await User.findOne({ email: body.email });
+
+  if (existingUser) {
+    return Response.json(
+      { error: "Account already exists" },
+      { status: 409 }
+    );
+  }
+
+  const user: any = await User.create({ ...body, password: hashedPassword });
+  const { password: _password, ...rest } = user.toObject();
+  return Response.json(rest);
 }
 
 // PATCH

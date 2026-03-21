@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import mongoose from "mongoose";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import bcrypt from "bcryptjs";
 
 import { User } from "@/mongoose/models/User";
 import { UserInfo } from "@/mongoose/models/UserInfo";
@@ -71,7 +72,21 @@ authProviders.push(
 
       const user: any = await User.findOne({ email });
 
-      if (!user || user.password !== password) {
+      if (!user?.password) {
+        return null;
+      }
+
+      let isValidPassword = false;
+
+      if (user.password.startsWith("$2")) {
+        isValidPassword = await bcrypt.compare(password, user.password);
+      } else if (user.password === password) {
+        isValidPassword = true;
+        user.password = await bcrypt.hash(password, 10);
+        await User.updateOne({ email }, { password: user.password });
+      }
+
+      if (!isValidPassword) {
         return null;
       }
 

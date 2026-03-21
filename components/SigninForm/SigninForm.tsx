@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { LocaleT } from "@/i18nConfig";
 import { AuthInput } from "../SignupForm/AuthInput";
 import CustomCheckbox from "../CustomCheckbox/CustomCheckbox";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const SigninForm = ({ lang }: { lang: LocaleT }) => {
   const [email, setEmail] = useState("");
@@ -15,32 +15,26 @@ const SigninForm = ({ lang }: { lang: LocaleT }) => {
   const [error, setError] = useState(false);
   const [findUser, setFindUser] = useState(false);
 
-  const router = useRouter();
-
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // const formData = new FormData(e.currentTarget);
-
-    // await signIn("credentials", { email, password, callbackUrl: "/" });
-    await signIn("Credentials", {
+    const res = await signIn("Credentials", {
       email,
       password,
-      // redirect: false,
-      callbackUrl: "/",
+      redirect: false,
     });
 
     setIsLoading(false);
 
-    // res?.ok && setFindUser(true);
-    // res?.error && setError(true);
+    if (res?.ok) {
+      toast.success("Signed in successfully");
+      window.location.href = `/${lang}/profile`;
+      return;
+    }
 
-    // if (res && !res.error) {
-    //   router.push("/");
-    // } else {
-    //   console.log(res, lang);
-    // }
+    toast.error("Invalid email or password");
+    setError(true);
   };
 
   return (

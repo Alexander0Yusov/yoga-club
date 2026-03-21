@@ -8,18 +8,19 @@ import { DividerLine } from "../../../components/DividerLine/DividerLine";
 
 const RegisterPage = ({ params: { lang } }: { params: { lang: LocaleT } }) => {
   return (
-    // рамка формы для регистрации
-    <PanelSignForm>
-      <TogglerSignMode lang={lang} />
+    <div className="flex min-h-[calc(100vh-120px)] items-center justify-center px-4">
+      <PanelSignForm>
+        <TogglerSignMode lang={lang} />
 
-      <div className="h-[0px] mt-[10px] mb-[30px] border-t-[1px] border-[#C57665]" />
+        <div className="mt-[10px] mb-[30px] h-0 w-full border-t-[1px] border-[#C57665]" />
 
-      <SignupForm lang={lang} />
+        <SignupForm lang={lang} />
 
-      <DividerLine />
+        <DividerLine />
 
-      <GoogleButton />
-    </PanelSignForm>
+        <GoogleButton />
+      </PanelSignForm>
+    </div>
   );
 };
 

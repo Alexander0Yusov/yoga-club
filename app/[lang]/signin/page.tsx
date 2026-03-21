@@ -10,17 +10,19 @@ import { DividerLine } from "../../../components/DividerLine/DividerLine";
 
 const LoginPage = ({ params: { lang } }: { params: { lang: LocaleT } }) => {
   return (
-    <PanelSignForm className="w-[400px]">
-      <TogglerSignMode lang={lang} />
+    <div className="flex min-h-[calc(100vh-120px)] items-center justify-center px-4">
+      <PanelSignForm>
+        <TogglerSignMode lang={lang} />
 
-      <div className="flex w-full h-[0px] mt-[10px] mb-[30px] border-t-[1px] border-[#C57665]" />
+        <div className="mt-[10px] mb-[30px] flex h-0 w-full border-t-[1px] border-[#C57665]" />
 
-      <SigninForm lang={lang} />
+        <SigninForm lang={lang} />
 
-      <DividerLine />
+        <DividerLine />
 
-      <GoogleButton />
-    </PanelSignForm>
+        <GoogleButton />
+      </PanelSignForm>
+    </div>
   );
 };
 

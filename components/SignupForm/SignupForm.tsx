@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { LocaleT } from "@/i18nConfig";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 import { AuthInput } from "./AuthInput";
 
 const signupSchema = z
@@ -50,14 +52,34 @@ const SignupForm = ({ lang }: { lang: LocaleT }) => {
       });
 
       if (!res.ok) {
-        setError("Something went wrong. Please try again later.");
+        const message =
+          res.status === 409
+            ? "Account already exists. Please sign in."
+            : "Something went wrong. Please try again later.";
+        setError(message);
+        toast.error(message);
         return;
       }
 
       setCreatedUser(true);
-      router.push(`/${lang}/signin`);
+      toast.success("Account created");
+      const authResult = await signIn("Credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (authResult?.ok) {
+        toast.success("Signed in successfully");
+        window.location.href = `/${lang}/profile`;
+      } else {
+        toast.error("Registration succeeded, but sign in failed. Please log in manually.");
+        router.push(`/${lang}/signin`);
+      }
     } catch {
-      setError("Network error. Please try again later.");
+      const message = "Network error. Please try again later.";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

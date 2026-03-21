@@ -10,7 +10,6 @@ import {
   useForm,
 } from "react-hook-form";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -46,19 +45,12 @@ const schema = yup.object({
 
 const ProfileForm = () => {
   const session = useSession();
-  const router = useRouter();
   const { user, setUser, setViewMode } = useStore();
 
   const [portrait, setPortrait] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const filePicker = useRef<HTMLInputElement>(null);
   const loadedCurrentUserRef = useRef(false);
-
-  useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/");
-    }
-  }, [session.status, router]);
 
   useEffect(() => {
     const loadCurrentUser = async () => {

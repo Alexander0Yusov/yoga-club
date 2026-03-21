@@ -19,27 +19,6 @@ type FeedbackItem = {
   deletedAt?: string | null;
 };
 
-const fallbackFeedbacks: FeedbackItem[] = [
-  {
-    _id: "mock-1",
-    authorName: "Alina",
-    comment: "Warm class structure and clear pacing. The studio felt calm from the first minute.",
-    rating: 5,
-    date: "2026-03-01T10:00:00Z",
-    isActive: true,
-    deletedAt: null,
-  },
-  {
-    _id: "mock-2",
-    authorName: "Ira",
-    comment: "Booking was easy and the feedback module stayed readable on mobile.",
-    rating: 4,
-    date: "2026-03-08T10:00:00Z",
-    isActive: true,
-    deletedAt: null,
-  },
-];
-
 function formatIsoDate(value: string): string {
   const date = new Date(value);
 
@@ -71,9 +50,7 @@ export default function FeedbackSlider() {
     void loadFeedbacks();
   }, []);
 
-  const items = useMemo(() => {
-    return feedbacks.length > 0 ? feedbacks : fallbackFeedbacks;
-  }, [feedbacks]);
+  const items = useMemo(() => feedbacks, [feedbacks]);
 
   return (
     <div className="overflow-hidden">

@@ -50,7 +50,7 @@ export default async function RootLayout({
               <Header2 lang={lang} />
 
               {/* flex-grow говорит - отдай все пустое место мне */}
-              <main className="flex flex-grow flex-col items-center justify-between font-mulish border border-yellow-500">
+              <main className="flex flex-grow w-full flex-col pt-20 font-mulish">
                 {children}
               </main>
 

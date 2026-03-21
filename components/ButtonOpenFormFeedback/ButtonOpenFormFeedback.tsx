@@ -19,7 +19,7 @@ const ButtonOpenFormFeedback = () => {
   return (
     <>
       <button
-        className=" absolute z-10 right-0 bottom-[140px] block ml-auto h-[50px] px-[20px] bg-brown-light-light rounded-full border-[1px] border-orange-950"
+        className="block h-[50px] w-fit rounded-full border-[1px] border-orange-950 bg-brown-light-light px-[20px]"
         onClick={showModal}
       >
         {session.status === "authenticated"

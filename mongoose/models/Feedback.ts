@@ -3,6 +3,7 @@ import mongoose, { Schema, models, model } from "mongoose";
 const feedbackSchema = new Schema(
   {
     authorName: { type: String, default: "" },
+    avatarUrl: { type: String, default: "" },
     comment: { type: String, default: "" },
     rating: { type: Number, default: 5 },
     isActive: { type: Boolean, default: true },

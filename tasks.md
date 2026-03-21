@@ -26,7 +26,15 @@
 - [x] Replace hard delete flows with `softDelete` methods that patch `deletedAt`.
 - [x] Ensure every request sends `Accept-Language`.
 - [x] Filter `GET /users` requests by `deletedAt=null` by default.
-- [ ] Purge legacy `app/` folder after all route groups are moved into `src/app/[lang]/`.
+- [PAUSED] Purge legacy `app/` folder after all route groups are moved into `src/app/[lang]/`.
+
+## 🏗 Architecture Rule: The Strangler Pattern (Active)
+
+- Backend Strategy: Keep the functional API surface in the root `app/api/`. New endpoints (like for `About Me`) must be added here to maintain SSR/Routing stability.
+- Frontend Strategy: All UI, Components, and Modules must be strictly in `src/`.
+- Phase-Out: The root `app/` directory will remain until the final transition to the external backend. No aggressive migrations to `src/app/api/` are allowed for now.
+- Goal: Stability and speed of feature delivery.
+- Policy signed: Active by Codex on 2026-03-21.
 
 ## Contract Rules
 

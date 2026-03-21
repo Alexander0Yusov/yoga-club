@@ -20,7 +20,7 @@ const isVisible = (event: EventRow) =>
   event.deletedAt == null && (event.isActive !== false);
 
 const EventsPage = async () => {
-  const getEvents = await import("../../../app/api/events/route");
+  const getEvents = await import("@/api/events/route");
   const response = await getEvents.GET(
     new Request("https://yoga-club.local/api/events?viewMode=USER")
   );

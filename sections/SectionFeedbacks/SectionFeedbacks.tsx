@@ -4,9 +4,10 @@ import ButtonOpenFormFeedback from "@/components/ButtonOpenFormFeedback/ButtonOp
 import FeedbackSlider from "@/components/FeedbackSlider/FeedbackSlider";
 
 const SectionFeedbacks = async () => {
-  const getFeedbacks = await import("../../app/api/feedbacks/route");
-
-  const feedbacks = await (await getFeedbacks.GET()).json();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const feedbacks = await fetch(`${siteUrl}/api/feedbacks`, {
+    cache: "no-store",
+  }).then((response) => response.json());
 
   return (
     <Section id="feedbacks" className=" relative py-[70px]">

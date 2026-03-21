@@ -1,21 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-// Import Swiper React components
+import { Autoplay, Controller, EffectCoverflow, EffectFade, Keyboard, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-// import required modules
-import {
-  Pagination,
-  Navigation,
-  EffectFade,
-  Keyboard,
-  EffectCoverflow,
-  Autoplay,
-  Controller,
-} from "swiper/modules";
 
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
@@ -26,28 +15,52 @@ import "swiper/css/effect-fade";
 import "swiper/css/keyboard";
 
 import "./styles.css";
-import Image from "next/image";
 import Arrow from "../0_ui/Arrow";
 
-export default function FeedbackSlider({ data }: { data: any }) {
-  const [firstSwiper, setFirstSwiper] = useState(null);
-  const [secondSwiper, setSecondSwiper] = useState(null);
-  const [feedbacks, setFeedbacks] = useState<any>([]);
+type FeedbackItem = {
+  _id: string;
+  authorName?: string;
+  comment?: string;
+  text?: string;
+  rating?: number;
+  date?: string;
+};
+
+type FeedbackSliderProps = {
+  data?: FeedbackItem[];
+};
+
+export default function FeedbackSlider({ data }: FeedbackSliderProps) {
+  const [firstSwiper, setFirstSwiper] = useState<unknown>(null);
+  const [secondSwiper, setSecondSwiper] = useState<unknown>(null);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>(data || []);
 
   useEffect(() => {
-    fetch("/api/feedbacks")
-      .then((res) => res.json())
-      .then((res) => {
-        setFeedbacks(res);
-        console.log(res);
-      });
-  }, []);
+    if (data && data.length > 0) {
+      setFeedbacks(data);
+      return;
+    }
+
+    const loadFeedbacks = async () => {
+      const response = await fetch("/api/feedbacks");
+      if (!response.ok) {
+        return;
+      }
+
+      const result = (await response.json()) as FeedbackItem[];
+      setFeedbacks(result);
+    };
+
+    void loadFeedbacks();
+  }, [data]);
+
+  const items = useMemo(() => feedbacks, [feedbacks]);
 
   return (
-    <div className="  ">
+    <div>
       <Swiper
-        onSwiper={setFirstSwiper as any}
-        controller={{ control: secondSwiper }}
+        onSwiper={setFirstSwiper as never}
+        controller={{ control: secondSwiper as never }}
         pagination={{
           type: "fraction",
           clickable: true,
@@ -82,8 +95,7 @@ export default function FeedbackSlider({ data }: { data: any }) {
           Navigation,
           Keyboard,
         ]}
-        // spaceBetween={35}
-        slidesPerView={7}
+        slidesPerView={1}
         speed={1000}
         centeredSlides={true}
         grabCursor={true}
@@ -91,27 +103,27 @@ export default function FeedbackSlider({ data }: { data: any }) {
         className="mySwiper mb-[20px]"
       >
         <div className="swiper-wrapper">
-          {feedbacks.map((item: any) => (
-            <SwiperSlide key={item._id} className="">
-              <div className=" relative w-[200px] h-[200px] rounded-full overflow-hidden">
-                <Image
-                  src={item?.userInfoId?.portrait || item?.userId?.image}
-                  alt={"client portrait"}
-                  width={200}
-                  height={200}
-                />
+          {items.map((item) => (
+            <SwiperSlide key={item._id}>
+              <div className="flex flex-col justify-between rounded-[20px] border-[1px] border-lilac bg-white px-[45px] py-[20px]">
+                <p className="mx-auto mb-[20px] text-fs24 text-cadetblue text-center">
+                  {item.authorName || "Guest"}
+                </p>
+                <p className="h-[75px] overflow-x-hidden overflow-y-auto">
+                  {item.comment || item.text || ""}
+                </p>
+                <p className="mt-auto text-[8px]">
+                  {item.date ? new Date(item.date).toISOString() : ""}
+                </p>
               </div>
             </SwiperSlide>
           ))}
         </div>
-
-        {/* If we need scrollbar */}
-        {/* <div className="swiper-scrollbar"></div> */}
       </Swiper>
 
       <Swiper
-        onSwiper={setSecondSwiper as any}
-        controller={{ control: firstSwiper }}
+        onSwiper={setSecondSwiper as never}
+        controller={{ control: firstSwiper as never }}
         slidesPerView={1}
         effect={"fade"}
         modules={[Controller, EffectFade]}
@@ -119,41 +131,35 @@ export default function FeedbackSlider({ data }: { data: any }) {
         className="mySwiper2"
       >
         <div className="swiper-wrapper">
-          {feedbacks.map((item: any) => (
-            <SwiperSlide
-              key={item._id}
-              className="border-[1px] border-orange-950"
-            >
-              <p className="mx-auto mb-[20px] text-fs24 text-cadetblue text-center">
-                {item.userInfoId?.nickname || item.userId.name}
+          {items.map((item) => (
+            <SwiperSlide key={item._id} className="border-[1px] border-orange-950">
+              <p className="mx-auto mb-[20px] text-center text-fs24 text-cadetblue">
+                {item.authorName || "Guest"}
               </p>
 
-              <div className="flex flex-col justify-between w-[710px] h-[130px] px-[45px] py-[20px] mx-auto bg-white rounded-[20px] border-[1px] border-lilac">
-                <p className=" h-[75px] overflow-x-hidden overflow-y-auto ">
-                  {item.text}
+              <div className="mx-auto flex h-[130px] w-[710px] flex-col justify-between rounded-[20px] border-[1px] border-lilac bg-white px-[45px] py-[20px]">
+                <p className="h-[75px] overflow-x-hidden overflow-y-auto">
+                  {item.comment || item.text || ""}
                 </p>
-                <p className=" text-[8px] mt-auto">{item.updatedAt}</p>
+                <p className="mt-auto text-[8px]">{item.date || ""}</p>
               </div>
             </SwiperSlide>
           ))}
         </div>
 
-        <div className=" flex justify-between items-center w-[258px] h-[40px] mx-auto mt-[110px] text-fs18 text-brown-light ">
+        <div className="mx-auto mt-[110px] flex h-[40px] w-[258px] items-center justify-between text-fs18 text-brown-light">
           <button
             id="feedbacks-swiper-button-prev"
-            className="h-full px-[16px] rounded-full border-[1px] border-brown-light-light disabled:text-brown-light-light disabled:bg-transparent"
+            className="h-full rounded-full border-[1px] border-brown-light-light px-[16px] disabled:bg-transparent disabled:text-brown-light-light"
           >
-            <Arrow className=" rotate-180" />
+            <Arrow className="rotate-180" />
           </button>
 
-          <div
-            id="feedbacks-swiper-pagination"
-            className=" mx-auto text-center "
-          />
+          <div id="feedbacks-swiper-pagination" className="mx-auto text-center" />
 
           <button
             id="feedbacks-swiper-button-next"
-            className="h-full px-[16px] rounded-full border-[1px] border-brown-light-light disabled:text-brown-light-light disabled:bg-transparent"
+            className="h-full rounded-full border-[1px] border-brown-light-light px-[16px] disabled:bg-transparent disabled:text-brown-light-light"
           >
             <Arrow />
           </button>

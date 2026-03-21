@@ -1,45 +1,59 @@
-import mongoose from "mongoose";
-import { getServerSession } from "next-auth";
-
+import { authConfig } from "@/configs/auth";
 import { Feedback } from "@/mongoose/models/Feedback";
 import { User } from "@/mongoose/models/User";
-import { authConfig } from "@/configs/auth";
+import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
+import { z } from "zod";
 
 const { MONGO_URL } = process.env;
 
+const connectToDatabase = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(MONGO_URL as string);
+  }
+};
+
+const updateFeedbackSchema = z.object({
+  _id: z.string().min(1),
+  comment: z.string().min(1).optional(),
+  text: z.string().min(1).optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+});
+
 // GET ALL MY FBCKS
 export async function GET() {
-  let email: any;
-  try {
-    const session = await getServerSession(authConfig);
-    email = session?.user?.email;
-  } catch (error) {
-    return Response.json({ error, number: 1 });
+  const session = await getServerSession(authConfig);
+  const email = session?.user?.email;
+
+  if (!email) {
+    return Response.json([]);
   }
 
-  const { _id } = await User.findOne({ email });
+  await connectToDatabase();
 
-  mongoose.connect(MONGO_URL as string);
-
-  const feedbacks: any = await Feedback.find({ userId: _id });
-
-  if (feedbacks) {
-    return Response.json(feedbacks);
+  const user = await User.findOne({ email }).lean<{ _id: string }>();
+  if (!user) {
+    return Response.json([]);
   }
 
-  return Response.json(null);
+  const feedbacks = await Feedback.find({ userId: user._id }).sort({ createdAt: -1 }).lean();
+
+  return Response.json(feedbacks);
 }
 
 // PATCH
 export async function PATCH(req: Request) {
-  let { _id, text } = await req.json();
+  await connectToDatabase();
 
-  mongoose.connect(MONGO_URL as string);
+  const payload = updateFeedbackSchema.parse(await req.json());
+  const updatedFeedback = await Feedback.findOneAndUpdate(
+    { _id: payload._id },
+    {
+      comment: payload.comment || payload.text,
+      rating: payload.rating,
+    },
+    { new: true }
+  ).lean();
 
-  const updatedFeedback: any = await Feedback.findOneAndUpdate(
-    { _id },
-    { text }
-  );
-
-  return Response.json({ ...updatedFeedback._doc });
+  return Response.json(updatedFeedback);
 }

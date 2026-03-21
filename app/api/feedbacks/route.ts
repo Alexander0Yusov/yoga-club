@@ -4,6 +4,7 @@ import { User } from "@/mongoose/models/User";
 import { UserInfo } from "@/mongoose/models/UserInfo";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 
 const { MONGO_URL } = process.env;
 
@@ -13,73 +14,242 @@ const connectToDatabase = async () => {
   }
 };
 
+const isSuperAdminEmail = (email?: string | null) =>
+  email?.toLowerCase() === "yusovsky2@gmail.com";
+
+const createFeedbackSchema = z.object({
+  authorName: z.string().trim().optional(),
+  comment: z.string().trim().optional(),
+  text: z.string().trim().optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+});
+
+const feedbackActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("toggleVisibility"),
+    _id: z.string().min(1),
+    isActive: z.boolean(),
+  }),
+  z.object({
+    action: z.literal("softDelete"),
+    _id: z.string().min(1),
+    deletedAt: z.string().datetime({ offset: true }).optional(),
+  }),
+  z.object({
+    action: z.literal("restore"),
+    _id: z.string().min(1),
+  }),
+  z.object({
+    action: z.literal("hardDelete"),
+    _id: z.string().min(1),
+  }),
+]);
+
+type FeedbackRecord = Record<string, unknown> & { _id?: unknown };
+
+function serializeFeedback(feedback: FeedbackRecord) {
+  return {
+    ...feedback,
+    _id: String(feedback._id ?? ""),
+  };
+}
+
+async function getRequestRole(email?: string | null) {
+  if (!email) {
+    return "USER" as const;
+  }
+
+  if (isSuperAdminEmail(email)) {
+    return "SUPERADMIN" as const;
+  }
+
+  const userInfo = await UserInfo.findOne({ userEmail: email }).lean<{
+    role?: "USER" | "ADMIN" | "SUPERADMIN";
+    viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+  }>();
+
+  return userInfo?.viewMode || userInfo?.role || "USER";
+}
+
+function getRequestedViewMode(req: Request) {
+  const viewMode = new URL(req.url).searchParams.get("viewMode");
+
+  if (viewMode === "USER" || viewMode === "ADMIN" || viewMode === "SUPERADMIN") {
+    return viewMode;
+  }
+
+  return null;
+}
+
+function resolveEffectiveRole(params: {
+  sessionRole: "USER" | "ADMIN" | "SUPERADMIN";
+  requestedViewMode: "USER" | "ADMIN" | "SUPERADMIN" | null;
+  email?: string | null;
+}) {
+  if (params.requestedViewMode) {
+    return params.requestedViewMode;
+  }
+
+  return params.sessionRole;
+}
+
+function isAuthorized(user: { email?: string | null; role: string }) {
+  return (
+    user.email?.toLowerCase() === "yusovsky2@gmail.com" ||
+    user.role === "ADMIN" ||
+    user.role === "SUPERADMIN"
+  );
+}
+
 // POST
 export async function POST(req: Request) {
-  let email: any;
-  try {
-    const session = await getServerSession(authConfig);
-    email = session?.user?.email;
-  } catch (error) {
-    return Response.json({ error, number: 1 });
-  }
-
   await connectToDatabase();
 
-  const { _id } = await User.findOne({ email });
+  const session = await getServerSession(authConfig);
+  const email = session?.user?.email;
 
-  let { text } = await req.json();
+  if (!email) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  const { _id: id } = await UserInfo.findOne({ userEmail: email });
+  const payload = createFeedbackSchema.parse(await req.json());
+  const user = await User.findOne({ email }).lean<{
+    _id: string;
+    name?: string;
+    email: string;
+  }>();
+  const userInfo = await UserInfo.findOne({ userEmail: email }).lean<{
+    _id?: string;
+    nickname?: string;
+  }>();
 
-  const newFeedback: any = await Feedback.create({
-    userId: _id,
-    userInfoId: id,
-    text,
+  const feedback = await Feedback.create({
+    authorName:
+      payload.authorName ||
+      userInfo?.nickname ||
+      user?.name ||
+      email.split("@")[0] ||
+      "Guest",
+    comment: payload.comment || payload.text || "",
+    rating: payload.rating || 5,
+    date: new Date().toISOString(),
+    isActive: true,
+    deletedAt: null,
+    userId: user?._id,
+    userInfoId: userInfo?._id,
   });
-  return Response.json({ ...newFeedback._doc });
 
-  // }
+  return Response.json(serializeFeedback(feedback.toObject() as FeedbackRecord));
 }
 
-// GET ALL
-export async function GET() {
+// GET
+export async function GET(req: Request) {
   await connectToDatabase();
 
-  const feedbacks: any = await Feedback.find()
-    .populate({
-      path: "userId",
-      model: "User",
-      select: "name image",
-    })
-    .populate({
-      path: "userInfoId",
-      model: "UserInfo",
-      select: "nickname portrait",
-    })
-    .exec()
-    .then((comments: any) => {
-      return comments;
-    })
-    .catch((err: any) => {
-      throw err;
-    });
+  const session = await getServerSession(authConfig);
+  const email = session?.user?.email;
+  const role = await getRequestRole(email);
+  const requestedViewMode = getRequestedViewMode(req);
+  const effectiveRole = resolveEffectiveRole({
+    sessionRole: role,
+    requestedViewMode,
+    email,
+  });
+  const showTrash =
+    effectiveRole === "SUPERADMIN" &&
+    new URL(req.url).searchParams.get("showTrash") === "1";
 
-  if (feedbacks) {
-    return Response.json(feedbacks);
+  const filter =
+    effectiveRole === "USER"
+      ? { isActive: true, deletedAt: null }
+      : showTrash
+        ? {}
+        : { deletedAt: null };
+
+  const feedbacks = await Feedback.find(filter)
+    .sort({ isFeatured: -1, createdAt: -1 })
+    .lean();
+
+  return Response.json(
+    feedbacks.map((feedback) => serializeFeedback(feedback as FeedbackRecord))
+  );
+}
+
+// PATCH
+export async function PATCH(req: Request) {
+  await connectToDatabase();
+
+  const session = await getServerSession(authConfig);
+  const email = session?.user?.email;
+  const role = await getRequestRole(email);
+  const requestedViewMode = getRequestedViewMode(req);
+  const effectiveRole = resolveEffectiveRole({
+    sessionRole: role,
+    requestedViewMode,
+    email,
+  });
+  const user = { email, role };
+
+  const payload = feedbackActionSchema.parse(await req.json());
+
+  if (payload.action === "hardDelete" && email?.toLowerCase() !== "yusovsky2@gmail.com") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return Response.json(null);
+  if (
+    (payload.action === "toggleVisibility" ||
+      payload.action === "softDelete" ||
+      payload.action === "restore") &&
+    !isAuthorized({ email, role: effectiveRole })
+  ) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (payload.action === "hardDelete") {
+    const deleted = await Feedback.findOneAndDelete({ _id: payload._id }).lean();
+    return Response.json(
+      deleted ? serializeFeedback(deleted as FeedbackRecord) : null
+    );
+  }
+
+  const feedback = await Feedback.findById(payload._id);
+
+  if (!feedback) {
+    return Response.json(null);
+  }
+
+  if (payload.action === "toggleVisibility") {
+    feedback.isActive = payload.isActive;
+    if (payload.isActive) {
+      feedback.deletedAt = null;
+    }
+  } else if (payload.action === "softDelete") {
+    feedback.isActive = false;
+    feedback.deletedAt = payload.deletedAt ? new Date(payload.deletedAt) : new Date();
+  } else {
+    feedback.isActive = true;
+    feedback.deletedAt = null;
+  }
+
+  await feedback.save();
+
+  return Response.json(
+    serializeFeedback(feedback.toObject() as FeedbackRecord)
+  );
 }
 
-// DELETE
+// DELETE legacy alias for hard delete.
 export async function DELETE(req: Request) {
-  // проверить не сможет ли посторонний удалить сделав запрос
+  const body = (await req.json()) as { _id?: string };
 
-  let { _id } = await req.json();
-
-  await connectToDatabase();
-
-  const deletedFeedback: any = await Feedback.findOneAndDelete({ _id });
-
-  return Response.json({ ...deletedFeedback._doc });
+  return PATCH(
+    new Request(req.url, {
+      method: "PATCH",
+      headers: req.headers,
+      body: JSON.stringify({
+        action: "hardDelete",
+        _id: body._id || "",
+      }),
+    })
+  );
 }

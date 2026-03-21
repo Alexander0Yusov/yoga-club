@@ -5,11 +5,12 @@ import { isoUtcDateTime } from "@/modules/_shared/contracts/isoUtcDateTime";
 
 export const FeedbackSchema = z
   .object({
-    isFeatured: z.boolean(),
-    name: z.string().min(1),
-    text: z.string().min(1),
+    authorName: z.string().min(1),
+    comment: z.string().min(1),
+    rating: z.number().int().min(1).max(5),
     date: isoUtcDateTime,
-    url: z.string().min(1).optional(),
+    userId: z.string().optional(),
+    userInfoId: z.string().optional(),
   })
   .extend(entityLifecycleSchema.shape);
 

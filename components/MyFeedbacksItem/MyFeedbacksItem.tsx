@@ -9,11 +9,11 @@ const MyFeedbacksItem = ({
   edit,
   del,
 }: {
-  id: any;
-  date: any;
-  text: any;
-  edit: any;
-  del: any;
+  id: string;
+  date: string;
+  text: string;
+  edit: (id: string) => void;
+  del: (id: string) => void;
 }) => {
   const originalDate = new Date(date);
 

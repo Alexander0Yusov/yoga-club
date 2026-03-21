@@ -56,13 +56,25 @@
   - independent modals
   - trash / restore toggle for superadmins
 
-## Data Integrity & Soft Delete
+## Data Integrity & Feedback Lifecycle (Refactored)
 
-- `GET` requests for users must exclude soft-deleted records by default.
-- `ADMIN` can restore content from trash.
-- `SUPERADMIN` can toggle "Show Deleted Items" in the content manager.
-- `deletedAt` must be the only delete marker used across contracts and API mutations.
-- `isActive` remains the visibility toggle for manual admin control.
+- **Three-Tier Filtering (GET /api/feedbacks):**
+  - `USER`: Returns only records where `isActive: true` AND `deletedAt: null`.
+  - `ADMIN`: Returns all records where `deletedAt: null` (can view hidden `isActive: false` content).
+  - `SUPERADMIN`: Returns all records including the trash, provided the "Show Trash" toggle is enabled.
+
+- **Action Permissions & RBAC:**
+  - `ADMIN` / `SUPERADMIN`: Authorized to toggle `isActive` (moderation) and execute `softDelete` (move to trash).
+  - `ADMIN` / `SUPERADMIN`: Authorized to restore content from trash (resetting `deletedAt` to `null`).
+  - **HARD DELETE (Permanent):** Physical database deletion is EXCLUSIVELY restricted to the user with email `yusovsky2@gmail.com`, and only for records already residing in the trash.
+
+- **State & Markers:**
+  - `deletedAt`: The sole deletion marker (`isoUtcDateTime | null`). If populated, the object is considered "trashed."
+  - `isActive`: The sole visibility marker for the public landing page (`boolean`). Allows for hiding feedback without removing it from the main list.
+  - **Persistence:** The current `viewMode` (USER/ADMIN/SUPERADMIN) must always synchronize with `localStorage` to ensure state persistence after a page refresh.
+
+- **Mock Integrity:**
+  - Seed data (Mocks) must represent all 4 state combinations (`Active`, `Hidden`, `Trashed`, `Legacy`) to validate API filtering accuracy and UI conditional rendering.
 
 ## Finalized Directory Tree
 
@@ -156,4 +168,4 @@ src/
 
 - [ ] Admin Checkbox ("Assign Admin") in users list is implemented and bound to role mutation.
 - [ ] Entity editing modals in `features/` or `shared/ui/` are restored.
-- [ ] Global feedback soft hide/restore flow is implemented end-to-end.
+- [x] Global feedback soft hide/restore flow is implemented end-to-end.

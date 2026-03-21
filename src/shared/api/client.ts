@@ -1,4 +1,5 @@
 import type { AboutMeContract } from "@/modules/about-me/contracts/about-me.contract";
+import type { FeedbackContract } from "@/modules/feedback/contracts/feedback.contract";
 import type { EventContract } from "@/modules/events/contracts/event.contract";
 import type { SectionContract } from "@/modules/sections/contracts/section.contract";
 
@@ -94,6 +95,24 @@ export interface UpdateUserBlacklistInput {
   userEmail: string;
   isInBlacklist: boolean;
 }
+
+export interface FeedbackMutationInput {
+  id: string;
+  locale?: string;
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+}
+
+export interface ToggleFeedbackVisibilityInput extends FeedbackMutationInput {
+  isActive: boolean;
+}
+
+export interface SoftDeleteFeedbackInput extends FeedbackMutationInput {
+  deletedAt?: string;
+}
+
+export interface RestoreFeedbackInput extends FeedbackMutationInput {}
+
+export interface HardDeleteFeedbackInput extends FeedbackMutationInput {}
 
 export function updateSection<T = SectionContract>({
   id,
@@ -220,6 +239,106 @@ export function softDeleteEvent<T = unknown>(
   locale?: string
 ): Promise<T> {
   return softDelete<T>({ path: `/events/${id}`, locale });
+}
+
+function buildFeedbackPath(viewMode?: "USER" | "ADMIN" | "SUPERADMIN"): string {
+  const params = new URLSearchParams();
+
+  if (viewMode) {
+    params.set("viewMode", viewMode);
+  }
+
+  const query = params.toString();
+
+  return query ? `/api/feedbacks?${query}` : "/api/feedbacks";
+}
+
+async function mutateLocalFeedback<T>({
+  path,
+  body,
+}: {
+  path: string;
+  body: Record<string, unknown>;
+}): Promise<T> {
+  return fetch(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Feedback update failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
+  });
+}
+
+export async function toggleFeedbackVisibility<T = FeedbackContract>({
+  id,
+  isActive,
+  viewMode,
+}: ToggleFeedbackVisibilityInput): Promise<T> {
+  return mutateLocalFeedback<T>({
+    path: buildFeedbackPath(viewMode),
+    body: {
+      action: "toggleVisibility",
+      _id: id,
+      isActive,
+    },
+  });
+}
+
+export async function softDeleteFeedback<T = FeedbackContract>({
+  id,
+  deletedAt,
+  viewMode,
+}: SoftDeleteFeedbackInput): Promise<T> {
+  return mutateLocalFeedback<T>({
+    path: buildFeedbackPath(viewMode),
+    body: {
+      action: "softDelete",
+      _id: id,
+      deletedAt,
+    },
+  });
+}
+
+export async function restoreFeedback<T = FeedbackContract>({
+  id,
+  viewMode,
+}: RestoreFeedbackInput): Promise<T> {
+  return mutateLocalFeedback<T>({
+    path: buildFeedbackPath(viewMode),
+    body: {
+      action: "restore",
+      _id: id,
+    },
+  });
+}
+
+export async function hardDeleteFeedback<T = FeedbackContract>({
+  id,
+  viewMode,
+}: HardDeleteFeedbackInput): Promise<T> {
+  return mutateLocalFeedback<T>({
+    path: buildFeedbackPath(viewMode),
+    body: {
+      action: "hardDelete",
+      _id: id,
+    },
+  });
+}
+
+export async function seedMockFeedbacks<T = FeedbackContract[]>({
+  locale,
+}: {
+  locale?: string;
+} = {}): Promise<T> {
+  return request<T>({
+    path: "/feedbacks/seed",
+    method: "POST",
+    locale,
+  });
 }
 
 export async function getUsers<T = unknown>({

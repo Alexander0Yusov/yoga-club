@@ -71,7 +71,7 @@ const SignupForm = ({ lang }: { lang: LocaleT }) => {
           className="flex flex-col border-[1px] border-[#BFB3B9] "
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col gap-[15px] w-[500px]">
+          <div className="flex flex-col gap-[15px] w-full">
             <AuthInput
               type="email"
               placeholder="Email"

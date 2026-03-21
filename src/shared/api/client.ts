@@ -114,6 +114,24 @@ export interface RestoreFeedbackInput extends FeedbackMutationInput {}
 
 export interface HardDeleteFeedbackInput extends FeedbackMutationInput {}
 
+export interface EventMutationInput {
+  id: string;
+  locale?: string;
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+}
+
+export interface ToggleEventVisibilityInput extends EventMutationInput {
+  isActive: boolean;
+}
+
+export interface SoftDeleteEventInput extends EventMutationInput {
+  deletedAt?: string;
+}
+
+export interface RestoreEventInput extends EventMutationInput {}
+
+export interface HardDeleteEventInput extends EventMutationInput {}
+
 export function updateSection<T = SectionContract>({
   id,
   data,
@@ -322,6 +340,94 @@ export async function hardDeleteFeedback<T = FeedbackContract>({
 }: HardDeleteFeedbackInput): Promise<T> {
   return mutateLocalFeedback<T>({
     path: buildFeedbackPath(viewMode),
+    body: {
+      action: "hardDelete",
+      _id: id,
+    },
+  });
+}
+
+function buildEventsPath(viewMode?: "USER" | "ADMIN" | "SUPERADMIN"): string {
+  const params = new URLSearchParams();
+
+  if (viewMode) {
+    params.set("viewMode", viewMode);
+  }
+
+  const query = params.toString();
+
+  return query ? `/api/events?${query}` : "/api/events";
+}
+
+async function mutateLocalEvent<T>({
+  path,
+  body,
+}: {
+  path: string;
+  body: Record<string, unknown>;
+}): Promise<T> {
+  return fetch(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(async (response) => {
+    if (!response.ok) {
+      throw new Error(`Event update failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
+  });
+}
+
+export async function toggleEventVisibility<T = EventContract>({
+  id,
+  isActive,
+  viewMode,
+}: ToggleEventVisibilityInput): Promise<T> {
+  return mutateLocalEvent<T>({
+    path: buildEventsPath(viewMode),
+    body: {
+      action: "toggleVisibility",
+      _id: id,
+      isActive,
+    },
+  });
+}
+
+export async function softDeleteEventLifecycle<T = EventContract>({
+  id,
+  deletedAt,
+  viewMode,
+}: SoftDeleteEventInput): Promise<T> {
+  return mutateLocalEvent<T>({
+    path: buildEventsPath(viewMode),
+    body: {
+      action: "softDelete",
+      _id: id,
+      deletedAt,
+    },
+  });
+}
+
+export async function restoreEventLifecycle<T = EventContract>({
+  id,
+  viewMode,
+}: RestoreEventInput): Promise<T> {
+  return mutateLocalEvent<T>({
+    path: buildEventsPath(viewMode),
+    body: {
+      action: "restore",
+      _id: id,
+    },
+  });
+}
+
+export async function hardDeleteEventLifecycle<T = EventContract>({
+  id,
+  viewMode,
+}: HardDeleteEventInput): Promise<T> {
+  return mutateLocalEvent<T>({
+    path: buildEventsPath(viewMode),
     body: {
       action: "hardDelete",
       _id: id,

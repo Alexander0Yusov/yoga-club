@@ -1,112 +1,102 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
-
 import { useParams, usePathname, useRouter } from "next/navigation";
-import ChevronDown from "../ChevronDown";
+import toast from "react-hot-toast";
 
 import useStore from "@/store/a_store";
-import toast from "react-hot-toast";
+import ChevronDown from "../ChevronDown";
 
 const EventsTopPanel = () => {
   const { isFormEventOpen, setIsFormEventOpen } = useStore();
+  const user = useStore((state) => state.user);
   const { id: eventId } = useParams();
   const router = useRouter();
   const pathname = usePathname();
   const isArchivePage = pathname.includes("archive");
+  const currentViewMode = user?.viewMode || user?.role || "USER";
+  const canManageEvents =
+    currentViewMode === "ADMIN" || currentViewMode === "SUPERADMIN";
 
   useEffect(() => {
     setIsFormEventOpen(false);
-  }, [pathname]);
+  }, [pathname, setIsFormEventOpen]);
 
   const handlerEventDelete = async () => {
-    let isDelAllowed = confirm("Підтверджуєте видалення?");
+    const isDelAllowed = confirm("Delete this event?");
     if (!isDelAllowed) return;
 
-    const eventDeletePromise = new Promise(async (resolve: any, reject) => {
-      const result = await fetch("/api/event", {
+    const eventDeletePromise = new Promise(async (resolve, reject) => {
+      const result = await fetch("/api/events", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: eventId }),
       });
 
       if (result.ok) {
-        resolve();
+        resolve(null);
         router.push("/events");
-      } else reject();
+      } else {
+        reject(new Error("Delete failed"));
+      }
     });
 
-    await toast.promise(
-      eventDeletePromise,
-      {
-        loading: "Триває обробка...",
-        success: "Успішна обробка",
-        error: "Помилка обробки",
-      },
-      {
-        success: {
-          duration: 2500,
-        },
-        error: {
-          duration: 4000,
-        },
-      }
-    );
+    await toast.promise(eventDeletePromise, {
+      loading: "Deleting...",
+      success: "Deleted",
+      error: "Delete failed",
+    });
   };
 
   const commonStyle =
-    "flex items-center justify-center rounded-[10px] w-[307px] h-[50px] font-mulish text-fs16 ";
+    "flex h-[50px] w-[307px] items-center justify-center rounded-[10px] border-[1px] border-localbrown bg-brown-light-light font-mulish text-fs16";
 
   return (
-    <>
-      <nav className="flex justify-between">
-        {!eventId && (
-          <ul className="flex gap-[16px] mb-[30px]">
-            <li>
-              <Link
-                className={`${
-                  !isArchivePage
-                    ? commonStyle + " font-bold bg-cadetblue-light "
-                    : commonStyle + " text-cadetblue bg-cadetblue-light-light "
-                }`}
-                href="/events"
-              >
-                Анонс подій
-              </Link>
-            </li>
-            <li>
-              <Link
-                className={`${
-                  isArchivePage
-                    ? commonStyle + " font-bold bg-cadetblue-light"
-                    : commonStyle + " text-cadetblue bg-cadetblue-light-light"
-                }`}
-                href="/events/archive"
-              >
-                Архів подій
-              </Link>
-            </li>
-          </ul>
-        )}
+    <nav className="flex justify-between">
+      {!eventId && (
+        <ul className="mb-[30px] flex gap-[16px]">
+          <li>
+            <Link
+              className={`${
+                !isArchivePage
+                  ? `${commonStyle} font-bold bg-cadetblue-light`
+                  : `${commonStyle} text-cadetblue bg-cadetblue-light-light`
+              }`}
+              href="/events"
+            >
+              Upcoming events
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`${
+                isArchivePage
+                  ? `${commonStyle} font-bold bg-cadetblue-light`
+                  : `${commonStyle} text-cadetblue bg-cadetblue-light-light`
+              }`}
+              href="/events/archive"
+            >
+              Archive
+            </Link>
+          </li>
+        </ul>
+      )}
 
-        <ul className="flex gap-[16px] mb-[30px]">
+      {canManageEvents && (
+        <ul className="mb-[30px] flex gap-[16px]">
           <li>
             <button
               type="button"
-              className="flex gap-[8px] justify-between items-center w-[307px] h-[50px] px-[16px] bg-brown-light-light border-[1px] border-localbrown rounded-[10px]"
+              className="flex h-[50px] w-[307px] items-center justify-between gap-[8px] rounded-[10px] border-[1px] border-localbrown bg-brown-light-light px-[16px]"
               onClick={() => setIsFormEventOpen(!isFormEventOpen)}
             >
-              {eventId ? (
-                <span>Редагувати подію</span>
-              ) : (
-                <span>Додати подію</span>
-              )}
-              {isFormEventOpen ? (
-                <ChevronDown className=" rotate-180 w-[16px] h-auto" />
-              ) : (
-                <ChevronDown className=" w-[16px] h-auto" />
-              )}
+              <span>{eventId ? "Edit event" : "Add event"}</span>
+              <ChevronDown
+                className={
+                  isFormEventOpen ? "rotate-180 w-[16px] h-auto" : "w-[16px] h-auto"
+                }
+              />
             </button>
           </li>
 
@@ -115,15 +105,15 @@ const EventsTopPanel = () => {
               <button
                 type="button"
                 onClick={handlerEventDelete}
-                className="flex justify-center items-center w-[307px] h-[50px] bg-brown-light-light border-[1px] border-localbrown rounded-[10px]"
+                className="flex h-[50px] w-[307px] items-center justify-center rounded-[10px] border-[1px] border-localbrown bg-brown-light-light"
               >
-                Видалити подію
+                Delete event
               </button>
             </li>
           )}
         </ul>
-      </nav>
-    </>
+      )}
+    </nav>
   );
 };
 

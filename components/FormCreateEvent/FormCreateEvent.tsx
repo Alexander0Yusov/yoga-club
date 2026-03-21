@@ -46,7 +46,7 @@ const FormCreateEvent = ({
   picsArray?: { id: string; value: string }[];
   defaultImg?: number;
 }) => {
-  const { isFormEventOpen } = useStore();
+  const { isFormEventOpen, setIsFormEventOpen } = useStore();
 
   const [defaultImgIndex, setDefaultImgIndex] = useState<number>(
     defaultImg || 0
@@ -86,9 +86,11 @@ const FormCreateEvent = ({
       if (res.ok) {
         reset();
         resetInputs();
+        setIsFormEventOpen(false);
 
         const r = await res.json();
         console.log("result patch ev ", r);
+        window.location.reload();
       }
     }
 
@@ -98,9 +100,11 @@ const FormCreateEvent = ({
       if (res.ok) {
         reset();
         resetInputs();
+        setIsFormEventOpen(false);
 
         const r = await res.json();
         console.log("result post ev ", r);
+        window.location.reload();
       }
     }
   };
@@ -122,7 +126,7 @@ const FormCreateEvent = ({
   }
 
   async function patchEvent(data: any) {
-    const result = await fetch("/api/event", {
+    const result = await fetch("/api/events", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

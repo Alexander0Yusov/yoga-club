@@ -12,65 +12,73 @@ const LinksProfilePage = () => {
 
   return (
     <nav>
-      <ul className="flex gap-[16px] border-b-[1px] border-cadetblue ">
+      <ul className="flex gap-[16px] border-b-[1px] border-cadetblue">
         <li>
           <Link
             className={`${
               pathname.endsWith("profile")
-                ? commonStyle + " font-bold bg-cadetblue-light "
-                : commonStyle + " text-cadetblue  "
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
             }`}
             href="/profile"
           >
             Особисті дані
           </Link>
         </li>
-
         <li>
           <Link
             className={`${
               pathname.includes("/myfeedbacks")
-                ? commonStyle + " font-bold bg-cadetblue-light"
-                : commonStyle + " text-cadetblue "
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
             }`}
             href="/profile/myfeedbacks"
           >
             Мої відгуки
           </Link>
         </li>
-
         <li>
           <Link
             className={`${
               pathname.includes("/feedbacks")
-                ? commonStyle + " font-bold bg-cadetblue-light"
-                : commonStyle + " text-cadetblue "
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
             }`}
             href="/profile/feedbacks"
           >
             Відгуки
           </Link>
         </li>
-
+        <li>
+          <Link
+            className={`${
+              pathname.includes("/events")
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
+            }`}
+            href="/profile/events"
+          >
+            События
+          </Link>
+        </li>
         <li>
           <Link
             className={`${
               pathname.includes("/demovideos")
-                ? commonStyle + " font-bold bg-cadetblue-light"
-                : commonStyle + " text-cadetblue "
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
             }`}
             href="/profile/demovideos"
           >
-            Демо відео
+            Демо видео
           </Link>
         </li>
-
         <li>
           <Link
             className={`${
               pathname.includes("/users")
-                ? commonStyle + " font-bold bg-cadetblue-light"
-                : commonStyle + " text-cadetblue "
+                ? `${commonStyle} font-bold bg-cadetblue-light`
+                : `${commonStyle} text-cadetblue`
             }`}
             href="/profile/users"
           >

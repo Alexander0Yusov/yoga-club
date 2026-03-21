@@ -8,7 +8,7 @@ interface PanelSignFormProps {
 export const PanelSignForm = ({ children, className }: PanelSignFormProps) => {
   return (
     <div
-      className={`border  w-[1150px]  p-[50px] my-[20px] rounded-[20px] border-[#BFB3B9] bg-[#BFB2B9]/50 ${className}`}
+      className={`border  w-[400px]  p-[50px] my-[20px] rounded-[20px] border-[#BFB3B9] bg-[#BFB2B9]/50 ${className}`}
     >
       {children}
     </div>

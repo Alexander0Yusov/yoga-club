@@ -1,52 +1,72 @@
-// import Image from "next/image";
-import Container from "@/components/0_ui/Container/Container";
-import EventsTopPanel from "@/components/0_ui/EventsTopPanel/EventsTopPanel";
+import { notFound } from "next/navigation";
+
+import BackButton from "@/components/0_ui/BackButton/BackButton";
 import FormCreateEvent from "@/components/FormCreateEvent/FormCreateEvent";
-
 import SwiperEvent from "@/components/SwiperEvent/SwiperEvent";
-import React from "react";
-
 import { events_lib } from "@/lib/dataEvents";
 
+type EventRow = {
+  _id: string;
+  slug?: string;
+  date?: string;
+  timeTarget?: string;
+  title?: string;
+  description?: string;
+  picsArray?: { _id?: string; value: string }[];
+  defaultImg?: number;
+  isActive?: boolean;
+  deletedAt?: string | null;
+};
+
+const isVisible = (event: EventRow) =>
+  event.deletedAt == null && (event.isActive !== false);
+
 const EventPage = async ({ params: { id } }: { params: { id: string } }) => {
-  const fetchEvent = await import("../../../api/event/route");
-
-  const { timeTarget, title, description, picsArray, defaultImg } = await (
-    await fetchEvent.GET(id as any)
-  ).json();
-
-  const arrayWithChanged_Id: any = picsArray?.map(
-    ({ _id, value }: { _id: string; value: string }) => ({ id: _id, value })
+  const getEvents = await import("../../../../app/api/events/route");
+  const response = await getEvents.GET(
+    new Request("https://yoga-club.local/api/events?viewMode=USER")
+  );
+  const events = (await response.json()) as EventRow[];
+  const event = events.find(
+    (item) =>
+      isVisible(item) &&
+      (item._id === id || item.slug === id)
   );
 
-  // console.log(333, await getEvents_lib());
-  // console.log(444, await [events_lib[defaultImg]]);
+  if (!event) {
+    notFound();
+  }
+
+  const arrayWithChangedId =
+    event.picsArray?.map(({ _id, value }) => ({ id: _id || "", value })) || [];
+  const eventDate = event.date || event.timeTarget || "";
 
   return (
     <>
+      <BackButton />
       <FormCreateEvent
         id={id}
-        timeTarget={timeTarget}
-        title={title}
-        description={description}
-        picsArray={arrayWithChanged_Id}
-        defaultImg={defaultImg}
+        timeTarget={eventDate}
+        title={event.title}
+        description={event.description}
+        picsArray={arrayWithChangedId}
+        defaultImg={event.defaultImg}
       />
 
-      <h1 className=" mb-[30px] text-center text-fs24">{title}</h1>
+      <h1 className="mb-[30px] text-center text-fs24">{event.title}</h1>
 
-      <div className="flex text-fs18 mb-[50px]">
-        <p className=" w-[200px] mr-[10px] font-bold  text-center">
-          {timeTarget}
+      <div className="mb-[50px] flex text-fs18">
+        <p className="mr-[10px] w-[200px] text-center font-bold">
+          {eventDate}
         </p>
-        <p>{description}</p>
+        <p>{event.description}</p>
       </div>
 
       <SwiperEvent
         pictures={
-          arrayWithChanged_Id?.length > 0
-            ? arrayWithChanged_Id
-            : [events_lib[defaultImg]]
+          arrayWithChangedId.length > 0
+            ? arrayWithChangedId
+            : [events_lib[event.defaultImg || 0]]
         }
       />
     </>

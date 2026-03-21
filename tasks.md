@@ -76,6 +76,14 @@
 - **Mock Integrity:**
   - Seed data (Mocks) must represent all 4 state combinations (`Active`, `Hidden`, `Trashed`, `Legacy`) to validate API filtering accuracy and UI conditional rendering.
 
+## Events Lifecycle & Management
+
+- [x] Three-tier filtering for `GET /api/events` is implemented for `USER`, `ADMIN`, and `SUPERADMIN`.
+- [x] `softDelete` and `restore` on events are protected by RBAC.
+- [x] Hard delete for events is restricted to `yusovsky2@gmail.com`.
+- [x] Events gallery and item components are integrated with lifecycle controls.
+- [x] Ten diverse event mocks can be seeded with placeholder visuals.
+
 ## Finalized Directory Tree
 
 ```txt
@@ -97,8 +105,18 @@ src/
         signup/
           page.tsx
       (user)/
-        account/
+        profile/
           page.tsx
+          events/
+            page.tsx
+          myfeedbacks/
+            page.tsx
+          feedbacks/
+            page.tsx
+          demovideos/
+            page.tsx
+          users/
+            page.tsx
       (admin)/
         dashboard/
           page.tsx

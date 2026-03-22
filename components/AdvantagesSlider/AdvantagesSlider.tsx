@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Keyboard, FreeMode } from "swiper/modules";
-import ArrowsBlock from "../ArrowsBlock/ArrowsBlock";
+import ArrowsBlock from "@/shared/ui/ArrowsBlock";
 
 import { advantages_lib } from "@/lib/dataAdvantages";
 

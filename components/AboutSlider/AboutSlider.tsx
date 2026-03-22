@@ -6,7 +6,7 @@ import { Navigation, EffectFade, Keyboard } from "swiper/modules";
 
 import { images_about_lib as data, textSlide_1 } from "@/lib/imagesAbout";
 
-import ArrowsBlock from "../ArrowsBlock/ArrowsBlock";
+import ArrowsBlock from "@/shared/ui/ArrowsBlock";
 
 // Import Swiper styles
 import "swiper/css";

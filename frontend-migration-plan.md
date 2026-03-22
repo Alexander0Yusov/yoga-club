@@ -38,6 +38,7 @@
 - [x] Account form slice completed: `ProfileForm` moved into `src/features/account/ui`, and the root `components/ProfileForm` duplicate removed
 - [x] Event form slice completed: `FormCreateEvent` moved into `src/features/events/ui`, and the root `components/FormCreateEvent` duplicate removed
 - [x] Tiny legacy component cleanup: root `ButtonOpenFormFeedback`, `DateTimePicker`, `ImagesUrlList`, `SwitchInput`, `FeedbacksItem`, and `MyFeedbacksItem` removed after canonical copies had already moved into `src/features/*`
+- [x] Slider helper cleanup: `AboutSlider` and `AdvantagesSlider` now use `src/shared/ui/ArrowsBlock`, and the root `components/ArrowsBlock` duplicate was removed
 
 Правило:
 - `reserve` используем как опорную базу для сверки и переноса проверенных фрагментов.

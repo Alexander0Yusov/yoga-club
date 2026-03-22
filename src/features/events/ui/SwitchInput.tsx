@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import Image from "next/image";
 
@@ -23,7 +24,7 @@ const SwitchInput = ({
 
       if (
         !elementsInPropagationPath.find((el: any) =>
-          el?.classList?.contains("touchOrCloseTargetEl")
+          el?.classList?.contains("touchOrCloseTargetEl"),
         )
       ) {
         setIsOpenInput(false);
@@ -45,7 +46,7 @@ const SwitchInput = ({
       document.body.removeEventListener("click", handlerClickOnNotTarget);
       window.removeEventListener("keydown", handlerKeydown);
     }
-  }, [isOpenInput, setIsOpenInput]);
+  }, [isOpenInput]);
 
   const handleAddUrl = () => {
     urlImage && setPicsArray([...picsArray, { id: nanoid(), value: urlImage }]);
@@ -60,19 +61,19 @@ const SwitchInput = ({
         <form
           onSubmit={handleAddUrl}
           className={
-            "touchOrCloseTargetEl w-full flex gap-[10px] items-center px-[16px] py-[10px] text-fs16 bg-white" +
+            "touchOrCloseTargetEl flex w-full items-center gap-[10px] bg-white px-[16px] py-[10px] text-fs16" +
             " " +
             className
           }
         >
           <label
             htmlFor="urlInput"
-            className="w-[64px] text-fs12 overflow-hidden"
+            className="w-[64px] overflow-hidden text-fs12"
           >
             Посилання на фото
           </label>
 
-          <div className=" relative flex justify-center items-center w-[50px] h-[50px] bg-lilac">
+          <div className="relative flex h-[50px] w-[50px] items-center justify-center bg-lilac">
             {urlImage &&
               (urlImage.startsWith("https://") ||
                 urlImage.startsWith("http://")) && (
@@ -94,19 +95,19 @@ const SwitchInput = ({
             placeholder="https:// ..."
             value={urlImage}
             onChange={(e) => setUrlImage(e.target.value)}
-            className=" self-end flex-[1] h-[30px] px-[8px] text-fs12 border-b-[1px] border-brown-light"
+            className="h-[30px] flex-[1] self-end border-b-[1px] border-brown-light px-[8px] text-fs12"
           />
 
           <button
-            className="block  h-[30px] text-brown-light uppercase border-[1px] border-brown-light rounded-[5px]"
+            className="block h-[30px] rounded-[5px] border-[1px] border-brown-light text-brown-light uppercase"
             type="button"
-            onClick={(e) => setUrlImage("")}
+            onClick={() => setUrlImage("")}
           >
             clear
           </button>
 
           <button
-            className="block w-[30px] h-[30px] ml-auto text-brown-light uppercase border-[1px] border-brown-light rounded-[5px]"
+            className="ml-auto block h-[30px] w-[30px] rounded-[5px] border-[1px] border-brown-light uppercase text-brown-light"
             type="submit"
             onClick={handleAddUrl}
           >

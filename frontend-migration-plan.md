@@ -36,6 +36,8 @@
 - [x] Shared UI slice started: canonical `ModalWindow`, `Portal`, `BackButton`, and `IconClose` live in `src/shared/ui`, and new public/event views import them
 - [x] Legacy root UI duplicates removed: old feedback/events/contact/admin wrappers and shared `0_ui` modal/back/button/portal/arrow components deleted after shared UI migration
 - [x] Account form slice completed: `ProfileForm` moved into `src/features/account/ui`, and the root `components/ProfileForm` duplicate removed
+- [x] Event form slice completed: `FormCreateEvent` moved into `src/features/events/ui`, and the root `components/FormCreateEvent` duplicate removed
+- [x] Tiny legacy component cleanup: root `ButtonOpenFormFeedback`, `DateTimePicker`, `ImagesUrlList`, `SwitchInput`, `FeedbacksItem`, and `MyFeedbacksItem` removed after canonical copies had already moved into `src/features/*`
 
 Правило:
 - `reserve` используем как опорную базу для сверки и переноса проверенных фрагментов.

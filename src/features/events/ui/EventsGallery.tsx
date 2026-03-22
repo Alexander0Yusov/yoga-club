@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 
 import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
-import FormCreateEvent from "@/components/FormCreateEvent/FormCreateEvent";
+import FormCreateEvent from "./FormCreateEvent";
 import useStore from "@/store/a_store";
 import {
   hardDeleteEventLifecycle,

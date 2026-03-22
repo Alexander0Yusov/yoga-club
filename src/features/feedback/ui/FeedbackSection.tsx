@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 
-import ButtonOpenFormFeedback from "@/components/ButtonOpenFormFeedback/ButtonOpenFormFeedback";
+import ButtonOpenFormFeedback from "./ButtonOpenFormFeedback";
 import FeedbackSlider from "@/widgets/landing-sections/FeedbackSlider";
 import { getPublicFeedbacks } from "@/shared/api/client";
 

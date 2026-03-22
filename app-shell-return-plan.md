@@ -183,6 +183,9 @@
 
 ### 4. Public landing routes
 
+Статус:
+- [x] завершено
+
 Цель:
 - Вернуть публичный landing shell в root router.
 

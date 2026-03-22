@@ -40,6 +40,7 @@
 - [x] Tiny legacy component cleanup: root `ButtonOpenFormFeedback`, `DateTimePicker`, `ImagesUrlList`, `SwitchInput`, `FeedbacksItem`, and `MyFeedbacksItem` removed after canonical copies had already moved into `src/features/*`
 - [x] Slider helper cleanup: `AboutSlider` and `AdvantagesSlider` now use `src/shared/ui/ArrowsBlock`, and the root `components/ArrowsBlock` duplicate was removed
 - [x] Live form slice cleanup: root `FeedbacksForm` and `SwiperEvent` removed after moving canonical copies into `src/features/feedback/ui` and `src/features/events/ui`
+- [x] Legacy header/section cleanup: root `Header*`, `HomeAncors*`, `LanguageChanger*`, `Logo`, `MySessionProvider`, `TranslationsProvider`, `AuthTrigger`, `ButtonToTop`, and `sections/Header*` / `sections/Footer2` removed after the canonical frontend moved to `src/`
 
 Правило:
 - `reserve` используем как опорную базу для сверки и переноса проверенных фрагментов.

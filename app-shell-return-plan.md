@@ -270,6 +270,9 @@
 
 ### 7. Shared route dependencies
 
+Статус:
+- [x] завершено
+
 Цель:
 - Подключить оставшиеся shared atoms и wrappers к root route tree.
 

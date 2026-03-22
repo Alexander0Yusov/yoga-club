@@ -10,7 +10,7 @@ const AccountPage = async ({ params }: { params: { lang: string } }) => {
     redirect(`/${params.lang}/signin`);
   }
 
-  return <AccountDashboard />;
+  return <AccountDashboard lang={params.lang} />;
 };
 
 export default AccountPage;

@@ -4,8 +4,14 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import ProfileForm from "./ProfileForm";
+import SignOutButton from "@/features/auth/ui/SignOutButton";
+import type { LocaleT } from "@/i18nConfig";
 
 type AccountTab = "general" | "bookings" | "reviews";
+
+type AccountDashboardProps = {
+  lang: LocaleT;
+};
 
 const tabs: Array<{ key: AccountTab; label: string }> = [
   { key: "general", label: "General Info" },
@@ -13,7 +19,7 @@ const tabs: Array<{ key: AccountTab; label: string }> = [
   { key: "reviews", label: "My Reviews" },
 ];
 
-const AccountDashboard = () => {
+const AccountDashboard = ({ lang }: AccountDashboardProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as AccountTab) || "general";
@@ -101,6 +107,9 @@ const AccountDashboard = () => {
               This shell is intentionally simple while the migration continues.
               It keeps the layout stable and the account route alive.
             </p>
+            <div className="mt-5">
+              <SignOutButton lang={lang} />
+            </div>
           </article>
 
           <article className="rounded-[24px] border border-[#dfbeaf] bg-white p-6">

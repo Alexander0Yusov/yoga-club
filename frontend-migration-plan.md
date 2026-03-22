@@ -43,6 +43,7 @@
 - [x] Legacy header/section cleanup: root `Header*`, `HomeAncors*`, `LanguageChanger*`, `Logo`, `MySessionProvider`, `TranslationsProvider`, `AuthTrigger`, `ButtonToTop`, and `sections/Header*` / `sections/Footer2` removed after the canonical frontend moved to `src/`
 - [x] Event item cleanup: root `components/EventsItem` removed after the canonical events item stayed only in `src/features/events/ui`
 - [x] `0_ui` audit cleanup: dead root `Container`, `IconEdit`, social icons, and section helpers removed; only live atoms (`ChevronDown`, `IconCalendar`, `IconDelete`, `IconDraggable`, `IconProfile`) remain in the root `0_ui` folder
+- [x] App shell slice already canonicalized: root `app/layout.tsx` is gone, and the active shell lives in `src/app/layout.tsx` plus `src/app/[lang]/layout.tsx`
 
 Правило:
 - `reserve` используем как опорную базу для сверки и переноса проверенных фрагментов.

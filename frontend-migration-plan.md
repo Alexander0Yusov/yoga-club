@@ -11,6 +11,7 @@
 Текущий чекпоинт:
 - [x] Auth feature slice перенесен в `src/features/auth/ui`
 - [x] Проверка типов пройдена: `npx tsc --noEmit`
+- [x] Auth pages slice completed: canonical `signin/signup` live in `src/app/[lang]/(auth)`, root route duplicates were removed
 - [x] Account shell slice перенесен в `src/app/[lang]/(user)/account` и связан с `src/features/account/ui`
 - [x] Account slice проверен повторно после переноса: `npx tsc --noEmit`
 - [x] Public landing shell slice сведен к `src/widgets/landing-sections/LandingSections` и использует мост в `app/[lang]/page.tsx`

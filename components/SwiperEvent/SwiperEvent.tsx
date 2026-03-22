@@ -37,7 +37,7 @@ import "swiper/css/pagination";
 // import "swiper/css/zoom";
 
 import Image from "next/image";
-import Arrow from "../0_ui/Arrow";
+import Arrow from "@/shared/ui/Arrow";
 
 const SwiperEvent: any = ({
   pictures,

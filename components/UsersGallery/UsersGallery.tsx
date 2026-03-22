@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import UsersItem from "../UsersItem/UsersItem";
 import useStore from "@/store/a_store";
+import { getUsers } from "@/shared/api/client";
 
 type UserRow = {
   _id: string;
@@ -27,16 +28,12 @@ const UsersGallery = () => {
     user?.originalRole === "SUPERADMIN";
 
   useEffect(() => {
-    const getUsers = async () => {
-      const result = await fetch("/api/usersAll");
-
-      if (result.ok) {
-        const res = (await result.json()) as UserRow[];
-        setUsers(res);
-      }
+    const loadUsers = async () => {
+      const res = (await getUsers()) as UserRow[];
+      setUsers(res);
     };
 
-    getUsers();
+    void loadUsers();
   }, []);
 
   return (

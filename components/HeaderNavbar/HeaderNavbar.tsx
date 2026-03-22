@@ -1,29 +1,19 @@
-"use client";
+﻿"use client";
 import { LocaleT } from "@/i18nConfig";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useEffect } from "react";
+import useStore from "@/store/a_store";
 
 const HeaderNavbar = ({ lang }: { lang: LocaleT }) => {
   const session = useSession();
+  const getCurrentUser = useStore((state) => state.getCurrentUser);
 
   useEffect(() => {
-    // запрос за остальной инфой и сет в стор
-    // в ходе гет запроса выяснить существует ли расширенная инфо
-    // если нет, то создать с пустыми полями и вернуть
-    // если есть то просто вернуть.
-
-    const getData = async () => {
-      //const { email, portrait, image, name, nickname, phone }
-      const res = await (await fetch("/api/userCurrent")).json();
-
-      console.log(res);
-    };
-
     if (session.data?.user) {
-      getData();
+      void getCurrentUser();
     }
-  }, [session.status === "authenticated"]);
+  }, [session.data?.user, getCurrentUser]);
 
   return (
     <nav className="flex gap-3 border-[1px] border-orange-700 p-1">
@@ -32,7 +22,7 @@ const HeaderNavbar = ({ lang }: { lang: LocaleT }) => {
 
       {session.status === "authenticated" && (
         <div className="flex gap-3 border-[1px] border-orange-950 p-[1px]">
-          <Link href={"/profile"} className=" border-[1px] border-orange-950 ">
+          <Link href={`/${lang}/account`} className=" border-[1px] border-orange-950 ">
             Profile {session.data.user?.email?.split("@")[0]}
           </Link>
 

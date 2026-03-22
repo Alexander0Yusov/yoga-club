@@ -1,6 +1,6 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
-import FeedbackSlider from "./FeedbackSlider";
+import FeedbackSection from "@/features/feedback/ui/FeedbackSection";
 
 function SectionCard({
   title,
@@ -73,16 +73,7 @@ export default function LandingSections({ lang }: { lang: string }) {
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-[#dfbeaf] bg-[#faf7f4] p-5">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#497274]">Feedback & reviews</p>
-            <p className="mt-2 text-lg font-semibold text-[#81453e]">Visible from day one</p>
-            <p className="mt-2 text-sm leading-6 text-[#4f2a26]">
-              Reviews stay as a separate visual module so the guest experience keeps the familiar structure.
-            </p>
-            <div className="mt-5">
-              <FeedbackSlider />
-            </div>
-          </div>
+          <FeedbackSection />
         </div>
       </section>
 

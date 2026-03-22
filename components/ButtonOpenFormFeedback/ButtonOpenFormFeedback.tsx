@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ModalWindow } from "../0_ui/ModalWindow/ModalWindow";
+import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
 import { useSession } from "next-auth/react";
 import FeedbacksForm from "../FeedbacksForm/FeedbacksForm";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import Arrow from "../0_ui/Arrow";
+import Arrow from "@/shared/ui/Arrow";
 
 const ArrowsBlock = ({
   idPrevButton,

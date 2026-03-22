@@ -1,5 +1,7 @@
 import { StateCreator } from "zustand";
 
+import { getCurrentUser } from "@/shared/api/client";
+
 type UserRole = "USER" | "ADMIN" | "SUPERADMIN";
 const VIEW_MODE_KEY = "yoga_club_view_mode";
 
@@ -106,20 +108,15 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   getCurrentUser: async () => {
     set({ userStatusLoading: true, userStatusError: null });
     try {
-      const response = await fetch("/api/userCurrent");
-      if (response.ok) {
-        const user = (await response.json()) as Partial<User>;
-        const savedViewMode = getSavedViewMode();
+      const user = (await getCurrentUser()) as Partial<User>;
+      const savedViewMode = getSavedViewMode();
 
-        set({
-          user: normalizeUser({
-            ...user,
-            viewMode: savedViewMode || user.viewMode,
-          }),
-        });
-      } else {
-        throw new Error("Failed to fetch current user");
-      }
+      set({
+        user: normalizeUser({
+          ...user,
+          viewMode: savedViewMode || user.viewMode,
+        }),
+      });
     } catch (error) {
       console.error("Error fetching current user:", error);
       set({ userStatusError: "Error fetching current user" });

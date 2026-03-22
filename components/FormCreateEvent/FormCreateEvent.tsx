@@ -9,6 +9,7 @@ import ImagesUrlList from "../ImagesUrlList/ImagesUrlList";
 import SwitchInput from "../SwitchInput/SwitchInput";
 import { events_lib } from "@/lib/dataEvents";
 import Image from "next/image";
+import { saveEvent } from "@/shared/api/client";
 
 import * as yup from "yup";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -79,66 +80,21 @@ const FormCreateEvent = ({
   });
 
   const handlerSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (id) {
-      const res = await patchEvent(data);
-      console.log("tt", res);
-
-      if (res.ok) {
-        reset();
-        resetInputs();
-        setIsFormEventOpen(false);
-
-        const r = await res.json();
-        console.log("result patch ev ", r);
-        window.location.reload();
-      }
-    }
-
-    if (!id) {
-      const res = await postEvent(data);
-
-      if (res.ok) {
-        reset();
-        resetInputs();
-        setIsFormEventOpen(false);
-
-        const r = await res.json();
-        console.log("result post ev ", r);
-        window.location.reload();
-      }
-    }
-  };
-
-  async function postEvent(data: any) {
-    const result = await fetch("/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: data.title,
-        timeTarget: data.timeTarget,
-        description: data.description,
-        picsArray: withoutIdNumbersArray,
-        defaultImg: defaultImgIndex,
-      }),
+    const result = await saveEvent({
+      id,
+      title: data.title,
+      timeTarget: data.timeTarget,
+      description: data.description,
+      picsArray: withoutIdNumbersArray,
+      defaultImg: defaultImgIndex,
     });
 
-    return result;
-  }
-
-  async function patchEvent(data: any) {
-    const result = await fetch("/api/events", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id,
-        title: data.title,
-        timeTarget: data.timeTarget,
-        description: data.description,
-        picsArray: withoutIdNumbersArray,
-        defaultImg: defaultImgIndex,
-      }),
-    });
-    return result;
+    if (result) {
+      reset();
+      resetInputs();
+      setIsFormEventOpen(false);
+      window.location.reload();
+    }
   }
 
   return (

@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { saveFeedback } from "@/shared/api/client";
 
 interface FeedbacksFormProps {
   selectedFeedback?: {
@@ -57,25 +58,10 @@ const FeedbacksForm: React.FC<FeedbacksFormProps> = ({
   async function submitHandler(comment: string, rating: number) {
     setShowModal(false);
 
-    const savingPromise = new Promise<void>(async (resolve, reject) => {
-      const result = await fetch(selectedFeedback ? "/api/myfeedbacks" : "/api/feedbacks", {
-        method: selectedFeedback ? "PATCH" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          _id: selectedFeedback?._id || "",
-          comment,
-          text: comment,
-          rating,
-        }),
-      });
-
-      if (result.ok) {
-        resolve();
-      } else {
-        reject(new Error("Failed to save feedback"));
-      }
+    const savingPromise = saveFeedback({
+      id: selectedFeedback?._id,
+      comment,
+      rating,
     });
 
     await toast.promise(savingPromise, {

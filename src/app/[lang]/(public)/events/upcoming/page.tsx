@@ -1,8 +1,56 @@
-export default function UpcomingEventsPage() {
+﻿import Image from "next/image";
+import { headers } from "next/headers";
+
+import BackButton from "@/shared/ui/BackButton/BackButton";
+import EventsGallery from "@/features/events/ui/EventsGallery";
+import { fetchPublicEvents, isUpcomingEvent } from "@/features/events/model/publicEvents";
+import noContentImage from "@/public/no-content.jpg";
+
+const UpcomingEventsPage = async () => {
+  const requestHeaders = headers();
+  const forwardedHost =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const forwardedProto =
+    requestHeaders.get("x-forwarded-proto") ??
+    (process.env.NODE_ENV === "development" ? "http" : "https");
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    (forwardedHost
+      ? `${forwardedProto}://${forwardedHost}`
+      : "http://localhost:3000");
+
+  const events = await fetchPublicEvents(siteUrl);
+  const upcoming = events
+    .filter(isUpcomingEvent)
+    .sort(
+      (a, b) =>
+        new Date(a.date || a.timeTarget || "").getTime() -
+        new Date(b.date || b.timeTarget || "").getTime(),
+    );
+
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-semibold text-[#81453e]">Upcoming Gallery</h1>
-      <p className="mt-4 text-[#497274]">Lightweight placeholder for the upcoming events gallery.</p>
+    <main className="space-y-6">
+      <BackButton />
+
+      {upcoming.length > 0 ? (
+        <EventsGallery events={upcoming} linkToDetail />
+      ) : (
+        <>
+          <div className="relative mx-auto mb-[40px] h-[400px] w-[400px] overflow-hidden border-[1px] border-orange-950">
+            <Image
+              src={noContentImage}
+              alt="meditating woman"
+              width={400}
+              height={400}
+              sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 17vw"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
+          <p className="text-center font-bold text-fs24">Чекаємо на події</p>
+        </>
+      )}
     </main>
   );
-}
+};
+
+export default UpcomingEventsPage;

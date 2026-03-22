@@ -66,6 +66,130 @@ export async function apiClient<T>(options: ApiClientOptions): Promise<T> {
   return request<T>(options);
 }
 
+interface LocalApiClientOptions extends Omit<RequestInit, "body"> {
+  path: string;
+  locale?: string;
+  body?: unknown;
+}
+
+interface SiteApiClientOptions extends Omit<RequestInit, "body"> {
+  siteUrl: string;
+  path: string;
+  locale?: string;
+  body?: unknown;
+}
+
+function buildLocalHeaders(
+  headers: HeadersInit | undefined,
+  locale: string,
+  body: unknown
+): Headers {
+  const nextHeaders = new Headers(headers);
+
+  nextHeaders.set("Accept-Language", locale);
+
+  if (!(body instanceof FormData) && body !== undefined && !(nextHeaders.get("Content-Type") || "").length) {
+    nextHeaders.set("Content-Type", "application/json");
+  }
+
+  return nextHeaders;
+}
+
+async function readLocalJson<T>(
+  response: Response,
+  errorLabel: string
+): Promise<T> {
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "");
+    let errorMessage = `${errorLabel} failed with status ${response.status}`;
+
+    if (errorText) {
+      try {
+        const errorBody = JSON.parse(errorText) as {
+          error?: { message?: string };
+          message?: string;
+        };
+
+        errorMessage =
+          errorBody?.error?.message || errorBody?.message || errorText;
+      } catch {
+        errorMessage = errorText;
+      }
+    }
+
+    const error = new Error(errorMessage) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+
+  if (!text) {
+    return undefined as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(`${errorLabel} returned invalid JSON`);
+  }
+}
+
+async function localRequest<T>({
+  path,
+  locale = defaultLocale,
+  headers,
+  body,
+  ...init
+}: LocalApiClientOptions): Promise<T> {
+  const hasBody = body !== undefined;
+  const finalHeaders = buildLocalHeaders(headers, locale, body);
+  const requestBody =
+    body instanceof FormData
+      ? body
+      : hasBody
+        ? JSON.stringify(body)
+        : undefined;
+
+  const response = await fetch(path, {
+    ...init,
+    headers: finalHeaders,
+    body: requestBody,
+  });
+
+  return readLocalJson<T>(response, `Local API request to ${path}`);
+}
+
+async function siteRequest<T>({
+  siteUrl,
+  path,
+  locale = defaultLocale,
+  headers,
+  body,
+  ...init
+}: SiteApiClientOptions): Promise<T> {
+  const hasBody = body !== undefined;
+  const finalHeaders = buildLocalHeaders(headers, locale, body);
+  const requestBody =
+    body instanceof FormData
+      ? body
+      : hasBody
+        ? JSON.stringify(body)
+        : undefined;
+
+  const response = await fetch(new URL(path, siteUrl), {
+    ...init,
+    headers: finalHeaders,
+    body: requestBody,
+  });
+
+  return readLocalJson<T>(response, `Site API request to ${path}`);
+}
+
 export interface UpdateSectionInput {
   id: string;
   data: Record<string, unknown>;
@@ -221,6 +345,39 @@ export function updateUserBlacklist<T = unknown>({
   });
 }
 
+export interface UpdateUserProfileInput {
+  formData: FormData;
+}
+
+export function updateUserProfile<T = unknown>({
+  formData,
+}: UpdateUserProfileInput): Promise<T> {
+  return localRequest<T>({
+    path: "/api/user",
+    method: "PATCH",
+    body: formData,
+  });
+}
+
+export interface CreateUserAccountInput {
+  email: string;
+  password: string;
+}
+
+export function createUserAccount<T = unknown>({
+  email,
+  password,
+}: CreateUserAccountInput): Promise<T> {
+  return localRequest<T>({
+    path: "/api/user",
+    method: "POST",
+    body: {
+      email,
+      password,
+    },
+  });
+}
+
 export function softDelete<T = unknown>({
   path,
   locale,
@@ -259,11 +416,18 @@ export function softDeleteEvent<T = unknown>(
   return softDelete<T>({ path: `/events/${id}`, locale });
 }
 
-function buildFeedbackPath(viewMode?: "USER" | "ADMIN" | "SUPERADMIN"): string {
+function buildFeedbackPath(
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN",
+  showTrash?: boolean
+): string {
   const params = new URLSearchParams();
 
   if (viewMode) {
     params.set("viewMode", viewMode);
+  }
+
+  if (showTrash) {
+    params.set("showTrash", "1");
   }
 
   const query = params.toString();
@@ -347,11 +511,49 @@ export async function hardDeleteFeedback<T = FeedbackContract>({
   });
 }
 
-function buildEventsPath(viewMode?: "USER" | "ADMIN" | "SUPERADMIN"): string {
+export async function getFeedbacks<T = FeedbackContract[]>({
+  viewMode,
+  showTrash = false,
+  locale,
+}: {
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+  showTrash?: boolean;
+  locale?: string;
+} = {}): Promise<T> {
+  return localRequest<T>({
+    path: buildFeedbackPath(viewMode, showTrash),
+    method: "GET",
+    locale,
+  });
+}
+
+export async function getPublicFeedbacks<T = FeedbackContract[]>({
+  siteUrl,
+  locale,
+}: {
+  siteUrl: string;
+  locale?: string;
+}): Promise<T> {
+  return siteRequest<T>({
+    siteUrl,
+    path: "/api/feedbacks",
+    method: "GET",
+    locale,
+  });
+}
+
+function buildEventsPath(
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN",
+  showTrash?: boolean
+): string {
   const params = new URLSearchParams();
 
   if (viewMode) {
     params.set("viewMode", viewMode);
+  }
+
+  if (showTrash) {
+    params.set("showTrash", "true");
   }
 
   const query = params.toString();
@@ -435,6 +637,130 @@ export async function hardDeleteEventLifecycle<T = EventContract>({
   });
 }
 
+export interface SaveFeedbackInput {
+  id?: string;
+  comment: string;
+  rating: number;
+}
+
+export async function saveFeedback<T = FeedbackContract>({
+  id,
+  comment,
+  rating,
+}: SaveFeedbackInput): Promise<T> {
+  return localRequest<T>({
+    path: id ? "/api/myfeedbacks" : "/api/feedbacks",
+    method: id ? "PATCH" : "POST",
+    body: {
+      _id: id || "",
+      comment,
+      text: comment,
+      rating,
+    },
+  });
+}
+
+export async function getMyFeedbacks<T = FeedbackContract[]>({
+  locale,
+}: {
+  locale?: string;
+} = {}): Promise<T> {
+  return localRequest<T>({
+    path: "/api/myfeedbacks",
+    method: "GET",
+    locale,
+  });
+}
+
+export interface SaveEventInput {
+  id?: string;
+  title: string;
+  timeTarget: string;
+  description: string;
+  picsArray: { value: string }[];
+  defaultImg: number;
+}
+
+export async function saveEvent<T = EventContract>({
+  id,
+  title,
+  timeTarget,
+  description,
+  picsArray,
+  defaultImg,
+}: SaveEventInput): Promise<T> {
+  return localRequest<T>({
+    path: "/api/events",
+    method: id ? "PATCH" : "POST",
+    body: {
+      id,
+      title,
+      timeTarget,
+      description,
+      picsArray,
+      defaultImg,
+    },
+  });
+}
+
+export async function deleteEvent<T = unknown>({
+  id,
+}: {
+  id: string;
+}): Promise<T> {
+  return localRequest<T>({
+    path: "/api/events",
+    method: "DELETE",
+    body: { id },
+  });
+}
+
+export async function getEvents<T = EventContract[]>({
+  viewMode,
+  showTrash = false,
+  locale,
+}: {
+  viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
+  showTrash?: boolean;
+  locale?: string;
+} = {}): Promise<T> {
+  return localRequest<T>({
+    path: buildEventsPath(viewMode, showTrash),
+    method: "GET",
+    locale,
+  });
+}
+
+export async function getPublicEvents<T = EventContract[]>({
+  siteUrl,
+  locale,
+}: {
+  siteUrl: string;
+  locale?: string;
+}): Promise<T> {
+  return siteRequest<T>({
+    siteUrl,
+    path: "/api/events?viewMode=USER",
+    method: "GET",
+    locale,
+  });
+}
+
+export async function sendTelegramContactForm<T = unknown>({
+  payload,
+  locale,
+}: {
+  payload: Record<string, unknown>;
+  locale?: string;
+}): Promise<T> {
+  return localRequest<T>({
+    path: "/api/telegram",
+    method: "POST",
+    locale,
+    body: payload,
+  });
+}
+
 export async function seedMockFeedbacks<T = FeedbackContract[]>({
   locale,
 }: {
@@ -454,8 +780,20 @@ export async function getUsers<T = unknown>({
   locale?: string;
   includeDeleted?: boolean;
 } = {}): Promise<T> {
-  return request<T>({
-    path: includeDeleted ? "/users" : "/users?deletedAt=null",
+  return localRequest<T>({
+    path: includeDeleted ? "/api/usersAll" : "/api/usersAll?deletedAt=null",
+    method: "GET",
+    locale,
+  });
+}
+
+export async function getCurrentUser<T = unknown>({
+  locale,
+}: {
+  locale?: string;
+} = {}): Promise<T> {
+  return localRequest<T>({
+    path: "/api/userCurrent",
     method: "GET",
     locale,
   });

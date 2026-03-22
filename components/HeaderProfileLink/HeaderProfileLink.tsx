@@ -1,19 +1,17 @@
-"use client";
-
-import React, { useEffect } from "react";
-import toast from "react-hot-toast";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 import IconProfile from "../0_ui/IconProfile";
 import useStore from "@/store/a_store";
 
 const HeaderProfileLink = () => {
   const session = useSession();
-  const { user, getCurrentUser, userStatusLoading, userStatusError } =
-    useStore();
+  const { user, getCurrentUser } = useStore();
 
   const imageSrc = session.data?.user?.image;
   const isAuth = session.status === "authenticated";
@@ -23,7 +21,7 @@ const HeaderProfileLink = () => {
       try {
         await getCurrentUser();
         resolve();
-      } catch (error) {
+      } catch {
         reject();
       }
     });
@@ -32,9 +30,9 @@ const HeaderProfileLink = () => {
       await toast.promise(
         savingPromise,
         {
-          loading: "Обробка профілю",
-          success: "Профіль збережено",
-          error: "Помилка збереження",
+          loading: "РћР±СЂРѕР±РєР° РїСЂРѕС„С–Р»СЋ",
+          success: "РџСЂРѕС„С–Р»СЊ Р·Р±РµСЂРµР¶РµРЅРѕ",
+          error: "РџРѕРјРёР»РєР° Р·Р±РµСЂРµР¶РµРЅРЅСЏ",
         },
         {
           success: {
@@ -43,7 +41,7 @@ const HeaderProfileLink = () => {
           error: {
             duration: 4000,
           },
-        }
+        },
       );
     };
 
@@ -53,7 +51,7 @@ const HeaderProfileLink = () => {
   }, [isAuth, getCurrentUser]);
 
   return (
-    <Link href={isAuth ? "/profile" : "/signin"} className=" mx-[12px] ">
+    <Link href={isAuth ? "/account" : "/signin"} className=" mx-[12px] ">
       <div className=" relative flex justify-center items-center w-[30px] h-[30px]  bg-lilac rounded-full overflow-hidden">
         {imageSrc && (
           <Image

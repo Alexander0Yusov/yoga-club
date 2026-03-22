@@ -13,7 +13,7 @@ import "swiper/css/keyboard";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import { useState } from "react";
-import { ModalWindow } from "../0_ui/ModalWindow/ModalWindow";
+import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
 
 // import "./styles.css";
 

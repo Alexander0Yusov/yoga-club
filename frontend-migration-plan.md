@@ -49,6 +49,7 @@
 - [x] `0_ui` audit cleanup: dead root `Container`, `IconEdit`, social icons, and section helpers removed; only live atoms (`ChevronDown`, `IconCalendar`, `IconDelete`, `IconDraggable`, `IconProfile`) remain in the root `0_ui` folder
 - [x] App shell slice already canonicalized: root `app/layout.tsx` is gone, and the active shell lives in `src/app/layout.tsx` plus `src/app/[lang]/layout.tsx`
 - [x] Shared atom slice completed: remaining `ChevronDown`, `IconCalendar`, `IconDelete`, and `IconDraggable` moved into `src/shared/ui`, and the root `components/0_ui` folder was removed entirely
+- [x] Final legacy cleanup completed for frontend scope: root `components/` and `sections/` folders are gone, leaving only the hybrid backend surface in `app/api` and canonical frontend under `src/`
 
 Правило:
 - `reserve` используем как опорную базу для сверки и переноса проверенных фрагментов.

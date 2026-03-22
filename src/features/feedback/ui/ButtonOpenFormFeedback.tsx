@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
 import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
-import FeedbacksForm from "@/components/FeedbacksForm/FeedbacksForm";
+import FeedbacksForm from "./FeedbacksForm";
 
 const ButtonOpenFormFeedback = () => {
   const [modalState, setModalState] = useState(false);

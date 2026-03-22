@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import BackButton from "@/shared/ui/BackButton/BackButton";
-import SwiperEvent from "@/components/SwiperEvent/SwiperEvent";
+import SwiperEvent from "@/features/events/ui/SwiperEvent";
 import { events_lib } from "@/lib/dataEvents";
 import { fetchPublicEvents, findEventById } from "@/features/events/model/publicEvents";
 

@@ -13,6 +13,7 @@
 - [x] Проверка типов пройдена: `npx tsc --noEmit`
 - [x] Auth pages slice completed: canonical `signin/signup` live in `src/app/[lang]/(auth)`, root route duplicates were removed
 - [x] Auth logic and auth shell slice completed: canonical `SignOutButton` lives in `src/features/auth/ui`, and the account shell exposes sign-out from the new cabinet
+- [x] API boundary cleanup slice completed: the last direct frontend event list fetch was moved from `EventsGallery` to `src/shared/api/client.ts`, so canonical UI now uses the shared client only
 - [x] Legacy section feedback bridge removed: `sections/SectionFeedbacks` was deleted after the canonical `FeedbackSection` already lived in `src/features/feedback/ui`
 - [x] Account shell slice перенесен в `src/app/[lang]/(user)/account` и связан с `src/features/account/ui`
 - [x] Account slice проверен повторно после переноса: `npx tsc --noEmit`

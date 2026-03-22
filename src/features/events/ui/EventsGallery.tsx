@@ -1,9 +1,10 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
 import FormCreateEvent from "./FormCreateEvent";
 import useStore from "@/store/a_store";
 import {
+  getEvents,
   hardDeleteEventLifecycle,
   restoreEventLifecycle,
   softDeleteEventLifecycle,
@@ -44,25 +45,15 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
   const canModerate = currentViewMode === "ADMIN" || currentViewMode === "SUPERADMIN";
   const canHardDelete = isSuperAdmin;
 
-  const eventsUrl = useMemo(() => {
-    const params = new URLSearchParams({
-      viewMode: currentViewMode,
-    });
-
-    if (showTrash && isSuperAdmin) {
-      params.set("showTrash", "true");
-    }
-
-    return `/api/events?${params.toString()}`;
-  }, [currentViewMode, isSuperAdmin, showTrash]);
-
   const reloadEvents = async () => {
     if (externalEvents?.length) {
       return;
     }
 
-    const response = await fetch(eventsUrl, { cache: "no-store" });
-    const result = (await response.json()) as EventRow[];
+    const result = await getEvents<EventRow[]>({
+      viewMode: currentViewMode as "USER" | "ADMIN" | "SUPERADMIN",
+      showTrash: showTrash && isSuperAdmin,
+    });
     setEvents(result);
   };
 
@@ -73,7 +64,7 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
     }
 
     void reloadEvents();
-  }, [externalEvents, eventsUrl]);
+  }, [externalEvents, currentViewMode, isSuperAdmin, showTrash]);
 
   const openEditModal = (id: string) => {
     const event = events.find((item) => item._id === id) || null;

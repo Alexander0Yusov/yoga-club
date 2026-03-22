@@ -211,6 +211,9 @@
 
 ### 5. Events routes
 
+Статус:
+- [x] завершено
+
 Цель:
 - Вернуть events, archive, upcoming и detail pages в root router.
 

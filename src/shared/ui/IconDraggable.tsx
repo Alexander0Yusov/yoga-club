@@ -1,5 +1,3 @@
-import React from "react";
-
 const IconDraggable = () => {
   return (
     <svg
@@ -8,7 +6,7 @@ const IconDraggable = () => {
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className=" w-[20px] h-[20px] cursor-grab border-[1px] border-orange-950"
+      className="w-[20px] h-[20px] cursor-grab border-[1px] border-orange-950"
     >
       <path d="M10.2868 0L12.7612 4.28571H7.81247L10.2868 0Z" fill="#BFB3B9" />
       <path

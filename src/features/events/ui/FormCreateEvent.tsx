@@ -6,13 +6,13 @@ import * as yup from "yup";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import ChevronDown from "@/components/0_ui/ChevronDown";
 import DateTimePicker from "./DateTimePicker";
 import ImagesUrlList from "./ImagesUrlList";
 import SwitchInput from "./SwitchInput";
 import { events_lib } from "@/lib/dataEvents";
 import useStore from "@/store/a_store";
 import { saveEvent } from "@/shared/api/client";
+import ChevronDown from "@/shared/ui/ChevronDown";
 
 type FormValues = {
   timeTarget: string;

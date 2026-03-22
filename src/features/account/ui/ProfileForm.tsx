@@ -13,9 +13,9 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
-import ChevronDown from "@/components/0_ui/ChevronDown";
 import useStore from "@/store/a_store";
 import { updateUserProfile, updateUserViewMode } from "@/shared/api/client";
+import ChevronDown from "@/shared/ui/ChevronDown";
 
 type ViewMode = "USER" | "ADMIN" | "SUPERADMIN";
 

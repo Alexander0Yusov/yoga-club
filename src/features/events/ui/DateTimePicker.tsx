@@ -7,7 +7,7 @@ import { uk } from "date-fns/locale";
 import { DayPicker, SelectSingleEventHandler } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
-import IconCalendar from "@/components/0_ui/IconCalendar";
+import IconCalendar from "@/shared/ui/IconCalendar";
 
 export default function DateTimePicker({
   register,

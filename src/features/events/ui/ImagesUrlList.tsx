@@ -1,8 +1,8 @@
 import React from "react";
 import Image from "next/image";
 
-import IconDraggable from "@/components/0_ui/IconDraggable";
-import IconDelete from "@/components/0_ui/IconDelete";
+import IconDraggable from "@/shared/ui/IconDraggable";
+import IconDelete from "@/shared/ui/IconDelete";
 
 const ImagesUrlList = ({
   picsArray,

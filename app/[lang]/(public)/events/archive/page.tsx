@@ -1,7 +1,18 @@
 import EventsGallery from "@/features/events/ui/EventsGallery";
 
-const ArchiveEventsPage = () => {
-  return <EventsGallery />;
+const Page = ({
+  params,
+}: {
+  params: { lang: string };
+}) => {
+  return (
+    <EventsGallery
+      lang={params.lang}
+      showRouteTabs
+      activeTab="archive"
+      displayMode="archive"
+    />
+  );
 };
 
-export default ArchiveEventsPage;
+export default Page;

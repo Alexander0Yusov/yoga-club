@@ -6,6 +6,7 @@ export interface User {
 
   telephone?: string;
   isSubscribed?: boolean;
+  lang?: string;
   isInBlacklist?: boolean;
 
   name?: string;

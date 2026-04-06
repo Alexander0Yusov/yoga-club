@@ -1,83 +1,76 @@
-import mongoose from "mongoose";
-import { User } from "@/mongoose/models/User";
-import { UserInfo } from "@/mongoose/models/UserInfo";
+import {
+  getMockUsers,
+  getCurrentAuthUser,
+  userViewModeSchema,
+  updateMockUser,
+  updateMockUserById,
+} from "@/shared/auth/mock-auth";
 
-// GET All
 export async function GET() {
-  mongoose.connect(process.env.MONGO_URL as string);
-
-  const usersPromise = User.find();
-  const userInfosPromise = UserInfo.find();
-
-  const [users, userInfos] = await Promise.all([
-    usersPromise,
-    userInfosPromise,
-  ]);
-
-  const allUsersArray = [];
-
-  for (let i = 0; i < users.length; i++) {
-    const { email } = users[i];
-
-    const user = userInfos.find(({ userEmail }) => email === userEmail);
-
-    if (user) {
-      allUsersArray.push({ ...user._doc, ...users[i]._doc });
-    } else {
-      allUsersArray.push(users[i]._doc);
-    }
-  }
-
-  return Response.json(allUsersArray);
+  return Response.json(getMockUsers());
 }
 
-// PATCH
 export async function PATCH(req: Request) {
-  const payload = (await req.json()) as {
-    userEmail?: string;
-    isInBlacklist?: boolean;
-    userId?: string;
-    viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
-  };
+  const payload = await req.json();
+  const parsed = userViewModeSchema.safeParse(payload);
 
-  mongoose.connect(process.env.MONGO_URL as string);
+  if (parsed.success) {
+    const { userEmail, userId, viewMode } = parsed.data;
 
-  if ((payload.userId || payload.userEmail) && payload.viewMode) {
-    const isAdmin =
-      payload.viewMode === "ADMIN" || payload.viewMode === "SUPERADMIN";
-    const query = payload.userId
-      ? { userId: payload.userId }
-      : { userEmail: payload.userEmail };
+    if (!userEmail && !userId) {
+      return Response.json(
+        { error: "userEmail or userId is required" },
+        { status: 400 },
+      );
+    }
 
-    const updated = await UserInfo.findOneAndUpdate(
-      query,
-      { isAdmin, role: payload.viewMode, viewMode: payload.viewMode },
-      { new: true }
-    );
+    const updatedUser = userEmail
+      ? updateMockUser(userEmail, {
+          role: viewMode,
+          originalRole: viewMode,
+          viewMode,
+          isAdmin: viewMode === "ADMIN" || viewMode === "SUPERADMIN",
+        })
+      : updateMockUserById(userId || "", {
+          role: viewMode,
+          originalRole: viewMode,
+          viewMode,
+          isAdmin: viewMode === "ADMIN" || viewMode === "SUPERADMIN",
+        });
+
+    if (!updatedUser) {
+      return Response.json({ error: "User not found" }, { status: 404 });
+    }
 
     return Response.json({
-      userId: payload.userId,
-      userEmail: payload.userEmail,
-      viewMode: payload.viewMode,
-      isAdmin: updated?.isAdmin ?? isAdmin,
+      userId: userId || updatedUser.id,
+      userEmail: updatedUser.email,
+      viewMode: updatedUser.viewMode,
+      isAdmin: updatedUser.isAdmin,
     });
   }
 
-  if (payload.userEmail && typeof payload.isInBlacklist === "boolean") {
-    const updated = await UserInfo.findOneAndUpdate(
-      { userEmail: payload.userEmail },
-      { isInBlacklist: payload.isInBlacklist },
-      { new: true }
-    );
+  const body = payload as { userEmail?: string; isInBlacklist?: boolean };
+
+  if (body.userEmail && typeof body.isInBlacklist === "boolean") {
+    const currentUser = getCurrentAuthUser();
+    const updatedUser = updateMockUser(body.userEmail, {
+      isInBlacklist: body.isInBlacklist,
+    });
+
+    if (!updatedUser) {
+      return Response.json({ error: "User not found" }, { status: 404 });
+    }
 
     return Response.json({
-      userEmail: payload.userEmail,
-      isInBlacklist: updated?.isInBlacklist ?? payload.isInBlacklist,
+      userEmail: updatedUser.email,
+      isInBlacklist: updatedUser.isInBlacklist,
+      requestedBy: currentUser?.email || null,
     });
   }
 
   return Response.json(
     { error: "Invalid payload for usersAll PATCH" },
-    { status: 400 }
+    { status: 400 },
   );
 }

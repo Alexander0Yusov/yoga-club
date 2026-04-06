@@ -12,6 +12,7 @@ const userInfoSchema = new Schema(
     portrait: { type: String, default: "" },
     phone: { type: String, default: "" },
     isSubscribed: { type: Boolean, default: false },
+    lang: { type: String, default: "" },
 
     role: {
       type: String,

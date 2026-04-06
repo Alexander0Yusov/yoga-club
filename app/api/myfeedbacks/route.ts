@@ -1,9 +1,9 @@
-import { authConfig } from "@/configs/auth";
 import { Feedback } from "@/mongoose/models/Feedback";
 import { User } from "@/mongoose/models/User";
 import mongoose from "mongoose";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
+
+import { getCurrentAuthUser } from "@/shared/auth/mock-auth";
 
 const { MONGO_URL } = process.env;
 
@@ -22,8 +22,7 @@ const updateFeedbackSchema = z.object({
 
 // GET ALL MY FBCKS
 export async function GET() {
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
+  const email = getCurrentAuthUser()?.email;
 
   if (!email) {
     return Response.json([]);

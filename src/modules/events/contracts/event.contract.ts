@@ -13,6 +13,16 @@ export const EventSchema = z
     location: z.string().min(1),
     price: z.union([z.string(), z.number()]),
     imageUrl: z.string().min(1),
+    instagramUrl: z.string().url().or(z.literal("")).optional(),
+    endTimeTarget: isoUtcDateTime.optional(),
+    picsArray: z
+      .array(
+        z.object({
+          value: z.string().min(1),
+          alt: z.string().trim().optional().default(""),
+        })
+      )
+      .optional(),
     isFeatured: z.boolean(),
     landingIndex: z.number().int(),
   })

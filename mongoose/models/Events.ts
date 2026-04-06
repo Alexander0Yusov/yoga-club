@@ -9,12 +9,19 @@ const eventsSchema = new Schema(
     location: { type: String, default: "" },
     price: { type: Schema.Types.Mixed, default: "" },
     imageUrl: { type: String, default: "" },
+    instagramUrl: { type: String, default: "" },
     isFeatured: { type: Boolean, default: false },
     landingIndex: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
     timeTarget: { type: String, default: "" },
-    picsArray: [{ value: { type: String } }],
+    endTimeTarget: { type: String, default: "" },
+    picsArray: [
+      {
+        value: { type: String },
+        alt: { type: String, default: "" },
+      },
+    ],
     defaultImg: { type: Number, default: 0 },
   },
   { timestamps: true, versionKey: false }

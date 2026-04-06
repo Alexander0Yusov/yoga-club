@@ -1,98 +1,124 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
-import { signIn } from "next-auth/react";
+import { z } from "zod";
 import { LocaleT } from "@/i18nConfig";
 import { useRouter } from "next/navigation";
-import { AuthInput } from "./AuthInput";
-import CustomCheckbox from "./CustomCheckbox";
-import Link from "next/link";
 import toast from "react-hot-toast";
 
-const SigninForm = ({ lang }: { lang: LocaleT }) => {
+import { signInAccount } from "@/shared/api/client";
+import { setAccessTokenCookie } from "@/shared/auth/access-token-cookie";
+import { AuthInput } from "./AuthInput";
+import CustomCheckbox from "./CustomCheckbox";
+
+const signInSchema = z.object({
+  email: z.string().trim().email("Введите корректный email"),
+  password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
+  rememberMe: z.boolean(),
+});
+
+const SigninForm = ({
+  lang,
+  callbackUrl,
+}: {
+  lang: LocaleT;
+  callbackUrl?: string;
+}) => {
   const router = useRouter();
+  const destination = callbackUrl || `/${lang}/account`;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [checked, setCheched] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [findUser, setFindUser] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError(null);
 
-    const res = await signIn("Credentials", {
+    const validation = signInSchema.safeParse({
       email,
       password,
-      redirect: false,
+      rememberMe,
     });
 
-    setIsLoading(false);
-
-    if (res?.ok) {
-      toast.success("Signed in successfully");
-      router.replace(`/${lang}/account`);
+    if (!validation.success) {
+      const message = validation.error.issues[0]?.message ?? "Invalid input";
+      setError(message);
+      toast.error(message);
       return;
     }
 
-    toast.error("Invalid email or password");
-    setError(true);
+    setIsLoading(true);
+
+    try {
+      const authResult = await signInAccount<{
+        accessToken: string;
+      }>({
+        email: validation.data.email,
+        password: validation.data.password,
+        rememberMe: validation.data.rememberMe,
+      });
+
+      setAccessTokenCookie(authResult.accessToken);
+      toast.success("Signed in successfully");
+      router.replace(destination);
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Invalid email or password";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <>
-      {error && <p>Something went wrong. Please try again later.</p>}
-      {!findUser ? (
-        <form
-          className="flex flex-col gap-[15px] border-[1px] border-orange-950"
-          onSubmit={handleSubmit}
-        >
-          <AuthInput
-            type="email"
-            placeholder="Email"
-            nameTitle="Email"
-            value={email}
-            setValue={setEmail}
-          />
-
-          <AuthInput
-            type="password"
-            placeholder="Password"
-            nameTitle="Password"
-            value={password}
-            setValue={setPassword}
-          />
-
-          <div className="flex flex-col gap-[20px]">
-            <div className="flex items-center justify-between w-full mt-4">
-              <CustomCheckbox
-                label="Remind"
-                checked={checked}
-                onChange={setCheched}
-              />
-
-              <Link
-                href="/forgot-password"
-                className="text-[14px]  text-[#81453E] hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-[50px] text-[16px] border-[1px] border-[#81453E] rounded-[10px]"
-            >
-              {"Sign In"}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <p>Account confirmed</p>
+    <form className="flex flex-col gap-[15px]" onSubmit={handleSubmit}>
+      {error && (
+        <p className="text-sm text-red-600" aria-live="polite">
+          {error}
+        </p>
       )}
-    </>
+
+      <AuthInput
+        type="email"
+        placeholder="Email"
+        nameTitle="Email"
+        value={email}
+        setValue={setEmail}
+        autoComplete="email"
+      />
+
+      <AuthInput
+        type="password"
+        placeholder="Password"
+        nameTitle="Password"
+        value={password}
+        setValue={setPassword}
+        autoComplete="current-password"
+      />
+
+      <div className="mt-2 flex items-center justify-between gap-4">
+        <CustomCheckbox
+          label="Remember me"
+          checked={rememberMe}
+          onChange={setRememberMe}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="mt-2 h-[50px] w-full rounded-[10px] border border-[#81453E] text-[16px] text-[#81453E] transition-colors hover:bg-[#81453E] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Sign In
+      </button>
+    </form>
   );
 };
 

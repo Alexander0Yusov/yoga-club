@@ -17,6 +17,7 @@ export const Portal: React.FC<PortalProps> = ({
   useEffect(() => {
     if (showModal) {
       document.body.classList.add("overflow-hidden");
+      nodeRef.current?.focus();
     } else {
       document.body.classList.remove("overflow-hidden");
     }
@@ -44,7 +45,6 @@ export const Portal: React.FC<PortalProps> = ({
     >
       {(state) => {
         const currentState = state as PortalStatus;
-        nodeRef.current?.focus();
 
         return createPortal(
           <div
@@ -56,7 +56,7 @@ export const Portal: React.FC<PortalProps> = ({
             tabIndex={0}
             onKeyDown={handleEsc}
             onClick={handleBackdrop}
-            className="fixed bottom-0 left-0 right-0 top-0 z-20 flex items-center justify-center bg-gray-400/50"
+            className="fixed bottom-0 left-0 right-0 top-0 z-[200] flex items-center justify-center bg-gray-400/50"
           >
             {children}
           </div>,

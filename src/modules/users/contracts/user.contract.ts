@@ -14,6 +14,7 @@ export const UserSchema = z
     viewMode: UserRoleSchema.optional(),
     telephone: z.string().optional(),
     isSubscribed: z.boolean().optional(),
+    lang: z.string().optional(),
     isInBlacklist: z.boolean().optional(),
     name: z.string().optional(),
     imgUrl: z.string().optional(),

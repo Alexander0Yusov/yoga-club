@@ -3,127 +3,140 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import ProfileForm from "./ProfileForm";
-import SignOutButton from "@/features/auth/ui/SignOutButton";
 import type { LocaleT } from "@/i18nConfig";
+import Container from "@/shared/ui/Container/Container";
+import useStore from "@/store/a_store";
 
-type AccountTab = "general" | "bookings" | "reviews";
+import SignOutButton from "@/features/auth/ui/SignOutButton";
+import EventsGallery from "@/features/events/ui/EventsGallery";
+import DemoVideosGallery from "@/features/demo-video/ui/DemoVideosGallery";
+import BookingsGallery from "@/features/bookings/ui/BookingsGallery";
+import FeedbacksGallery from "@/features/feedback/ui/FeedbacksGallery";
+import MyFeedbacksGallery from "@/features/feedback/ui/MyFeedbacksGallery";
+import UsersGallery from "@/features/users/ui/UsersGallery";
+import ProfileForm from "./ProfileForm";
+
+type AccountTab =
+  | "personal"
+  | "my-reviews"
+  | "reviews"
+  | "my-bookings"
+  | "bookings"
+  | "events"
+  | "demo-video"
+  | "users";
 
 type AccountDashboardProps = {
   lang: LocaleT;
 };
 
 const tabs: Array<{ key: AccountTab; label: string }> = [
-  { key: "general", label: "General Info" },
-  { key: "bookings", label: "My Bookings" },
-  { key: "reviews", label: "My Reviews" },
+  { key: "personal", label: "Особисті дані" },
+  { key: "my-reviews", label: "Мої відгуки" },
+  { key: "reviews", label: "Відгуки" },
+  { key: "my-bookings", label: "Мої заявки" },
+  { key: "bookings", label: "Заявки" },
+  { key: "events", label: "Події" },
+  { key: "demo-video", label: "Демо відео" },
+  { key: "users", label: "Користувачі" },
 ];
+
+const normalizeTab = (value: string | null): AccountTab => {
+  switch (value) {
+    case "my-reviews":
+    case "reviews":
+    case "my-bookings":
+    case "bookings":
+    case "events":
+    case "demo-video":
+    case "users":
+    case "personal":
+      return value;
+    case "general":
+      return "personal";
+    default:
+      return "personal";
+  }
+};
 
 const AccountDashboard = ({ lang }: AccountDashboardProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activeTab = (searchParams.get("tab") as AccountTab) || "general";
+  const currentUser = useStore((state) => state.user);
+  const activeTab = normalizeTab(searchParams.get("tab"));
+  const isAdmin =
+    currentUser?.role === "ADMIN" ||
+    currentUser?.role === "SUPERADMIN" ||
+    currentUser?.originalRole === "SUPERADMIN";
+  const visibleTabs = tabs.filter((tab) => {
+    if (tab.key === "bookings" || tab.key === "users") {
+      return isAdmin;
+    }
+
+    return true;
+  });
+  const visibleTabKeys = new Set(visibleTabs.map((tab) => tab.key));
+  const effectiveTab =
+    visibleTabKeys.has(activeTab)
+      ? activeTab
+      : activeTab === "bookings"
+        ? "my-bookings"
+        : "personal";
 
   const tabBase =
-    "rounded-full border px-4 py-2 text-sm transition-colors duration-200";
+    "flex h-[40px] w-[160px] items-center justify-center rounded-t-[10px] border border-b-0 px-4 text-[16px] transition-colors duration-200";
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="space-y-4">
-        <p className="text-sm uppercase tracking-[0.2em] text-[#497274]">
-          Account
-        </p>
-        <h1 className="text-4xl font-semibold text-[#81453e]">User Dashboard</h1>
-        <p className="max-w-3xl text-[#497274]">
-          General info, bookings, and reviews stay in one flat account surface
-          for this phase.
-        </p>
+    <Container className="py-10">
+      <div className="mb-[30px] flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-4">
+          <p className="text-sm uppercase tracking-[0.2em] text-[#497274]">
+            Ваш профіль
+          </p>
+          <h1 className="font-philosopher text-[44px] font-bold leading-none text-localbrown md:text-[60px]">
+            Кабінет користувача
+          </h1>
+        </div>
+
+        <SignOutButton lang={lang} />
       </div>
 
-      <nav className="mt-8 flex flex-wrap gap-3">
-        {tabs.map((tab) => {
-          const href = `${pathname}?tab=${tab.key}`;
-          const isActive = activeTab === tab.key;
+      <nav>
+        <ul className="flex flex-wrap gap-4 border-b border-[#497274]">
+          {visibleTabs.map((tab) => {
+            const href = `${pathname}?tab=${tab.key}`;
+            const isActive = effectiveTab === tab.key;
 
-          return (
-            <Link
-              key={tab.key}
-              href={href}
-              className={`${tabBase} ${
-                isActive
-                  ? "border-[#81453e] bg-[#81453e] text-white"
-                  : "border-[#81453e] text-[#81453e]"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
+            return (
+              <li key={tab.key}>
+                <Link
+                  href={href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`${tabBase} ${
+                    isActive
+                      ? "border-[#497274] bg-[#dfd9dc] font-bold text-[#2c2c2c]"
+                      : "border-[#497274] bg-white text-[#497274]"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      <section className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <article className="rounded-[24px] border border-[#dfbeaf] bg-white p-6 shadow-sm">
-          {activeTab === "general" && <ProfileForm />}
-
-          {activeTab === "bookings" && (
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold text-[#81453e]">
-                Global Bookings
-              </h2>
-              <p className="text-sm leading-6 text-[#4f2a26]">
-                Booking history will remain a global module and will not be
-                tied to a specific event entity yet.
-              </p>
-              <div className="rounded-[18px] border border-dashed border-[#dfbeaf] bg-[#faf7f4] p-5 text-sm text-[#4f2a26]">
-                Booking list placeholder. Real data will be connected in the
-                next slice.
-              </div>
-            </div>
-          )}
-
-          {activeTab === "reviews" && (
-            <div className="space-y-3">
-              <h2 className="text-2xl font-semibold text-[#81453e]">
-                Feedback / Reviews
-              </h2>
-              <p className="text-sm leading-6 text-[#4f2a26]">
-                Review history stays visible here as an independent account
-                module for guests and authenticated users.
-              </p>
-              <div className="rounded-[18px] border border-dashed border-[#dfbeaf] bg-[#faf7f4] p-5 text-sm text-[#4f2a26]">
-                Reviews placeholder. The next slice will mount the synced
-                review list here.
-              </div>
-            </div>
-          )}
-        </article>
-
-        <aside className="space-y-6">
-          <article className="rounded-[24px] border border-[#dfbeaf] bg-[#faf7f4] p-6">
-            <h2 className="text-2xl font-semibold text-[#81453e]">
-              Account Snapshot
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#4f2a26]">
-              This shell is intentionally simple while the migration continues.
-              It keeps the layout stable and the account route alive.
-            </p>
-            <div className="mt-5">
-              <SignOutButton lang={lang} />
-            </div>
-          </article>
-
-          <article className="rounded-[24px] border border-[#dfbeaf] bg-white p-6">
-            <h2 className="text-2xl font-semibold text-[#81453e]">
-              Migration Note
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#4f2a26]">
-              The old profile route can stay as a temporary bridge while we
-              shift the active user cabinet to the new App Router tree.
-            </p>
-          </article>
-        </aside>
+      <section className="border border-[#497274] bg-white p-6">
+        {effectiveTab === "personal" && <ProfileForm />}
+        {effectiveTab === "my-reviews" && <MyFeedbacksGallery />}
+        {effectiveTab === "reviews" && <FeedbacksGallery />}
+        {effectiveTab === "my-bookings" && <BookingsGallery mode="user" />}
+        {effectiveTab === "bookings" && <BookingsGallery mode="admin" />}
+        {effectiveTab === "events" && <EventsGallery linkToDetail={false} />}
+        {effectiveTab === "demo-video" && <DemoVideosGallery />}
+        {effectiveTab === "users" && <UsersGallery />}
       </section>
-    </main>
+    </Container>
   );
 };
 

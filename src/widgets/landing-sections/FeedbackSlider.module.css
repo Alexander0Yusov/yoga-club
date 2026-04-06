@@ -1,0 +1,24 @@
+.avatars {
+  overflow-x: clip;
+  overflow-y: visible;
+  padding-inline: 16px;
+}
+
+.avatars :global(.swiper-wrapper) {
+  align-items: center;
+  will-change: transform;
+}
+
+.avatarSlide {
+  width: auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -2,19 +2,33 @@ import type { PracticeBenefit } from "@/entities/practice-benefit/model/types";
 
 export const practiceBenefitMock: PracticeBenefit[] = [
   {
-    text: "Find your balance through calm, structured practice.",
-    slavefield: "Balance",
+    text_1: "Знаходьте баланс через спокійну і структуровану практику.",
   },
   {
-    text: "Build strength and flexibility with gentle consistency.",
-    slavefield: "Strength",
+    text_1: "Розвивайте силу та гнучкість через м’яку регулярність.",
   },
   {
-    text: "Reset your nervous system with mindful breathing.",
-    slavefield: "Breath",
+    text_1: "Відновлюйте нервову систему через уважне дихання.",
   },
   {
-    text: "Move with intention and improve daily posture.",
-    slavefield: "Posture",
+    text_1: "Рухайтеся усвідомлено та покращуйте щоденну поставу.",
+  },
+  {
+    text_1: "Починайте день із м’якого налаштування на спокій.",
+  },
+  {
+    text_1: "Знімайте напругу в тілі через повільні та точні рухи.",
+  },
+  {
+    text_1: "Слухайте себе та дозвольте тілу відновлюватися природно.",
+  },
+  {
+    text_1: "Зміцнюйте внутрішню опору без зайвого навантаження.",
+  },
+  {
+    text_1: "Підтримуйте ясність думок через ритм і дихання.",
+  },
+  {
+    text_1: "Завершуйте практику з відчуттям легкості та рівноваги.",
   },
 ];

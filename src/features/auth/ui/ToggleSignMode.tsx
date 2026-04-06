@@ -19,28 +19,28 @@ const TogglerSignMode = ({ lang }: { lang: LocaleT }) => {
     <div className="flex gap-[20px]">
       <Link
         href={signInPath}
-        className={`block text-center text-[36px] h-[40px] ${
+        className={`block h-[40px] text-center text-[36px] ${
           isSignIn
-            ? "pointer-events-none text-[#81453E] font-bold"
+            ? "pointer-events-none font-bold text-[#81453E]"
             : "text-[#81453E]/40"
         }`}
         aria-disabled={isSignIn}
         tabIndex={isSignIn ? -1 : undefined}
       >
-        Sign In
+        Увійти
       </Link>
 
       <Link
         href={signUpPath}
-        className={`block text-center text-[36px] h-[40px] ${
+        className={`block h-[40px] text-center text-[36px] ${
           isSignUp
-            ? "pointer-events-none text-[#81453E] font-bold"
+            ? "pointer-events-none font-bold text-[#81453E]"
             : "text-[#81453E]/40"
         }`}
         aria-disabled={isSignUp}
         tabIndex={isSignUp ? -1 : undefined}
       >
-        Sign Up
+        Реєстрація
       </Link>
     </div>
   );

@@ -9,12 +9,10 @@ import {
   type Resolver,
   useForm,
 } from "react-hook-form";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
 import toast from "react-hot-toast";
 
 import useStore from "@/store/a_store";
-import { updateUserProfile, updateUserViewMode } from "@/shared/api/client";
+import { updateUserProfile } from "@/shared/api/client";
 import ChevronDown from "@/shared/ui/ChevronDown";
 
 type ViewMode = "USER" | "ADMIN" | "SUPERADMIN";
@@ -24,6 +22,19 @@ type FormValues = {
   phone: string;
   isSubscribed: boolean;
 };
+
+function getLinkedIdentityAvatar(
+  linkedIdentities?: Array<{
+    provider: string;
+    providerAvatarUrl?: string;
+    providerName?: string;
+  }>,
+): string {
+  return (
+    linkedIdentities?.find((identity) => identity.providerAvatarUrl)
+      ?.providerAvatarUrl || ""
+  );
+}
 
 const schema = yup.object({
   nickname: yup
@@ -44,7 +55,6 @@ const schema = yup.object({
 });
 
 const ProfileForm = () => {
-  const session = useSession();
   const { user, setUser, setViewMode, getCurrentUser } = useStore();
 
   const [portrait, setPortrait] = useState<string>("");
@@ -53,11 +63,11 @@ const ProfileForm = () => {
   const loadedCurrentUserRef = useRef(false);
 
   useEffect(() => {
-    if (session.status === "authenticated" && !loadedCurrentUserRef.current) {
+    if (!loadedCurrentUserRef.current) {
       loadedCurrentUserRef.current = true;
       void getCurrentUser();
     }
-  }, [session.status, getCurrentUser]);
+  }, [getCurrentUser]);
 
   useEffect(() => {
     if (!file) {
@@ -105,27 +115,45 @@ const ProfileForm = () => {
   };
 
   const handlerSubmit: SubmitHandler<FormValues> = async (data) => {
+    const providerAvatar = getLinkedIdentityAvatar(user?.linkedIdentities);
+    const currentAvatar =
+      portrait || user?.portrait || user?.image || providerAvatar || "";
     const formData = new FormData();
+    formData.append("name", data.nickname === undefined ? "" : data.nickname);
     formData.append(
-      "nickname",
-      data.nickname === undefined ? "" : data.nickname,
+      "telephone",
+      data.phone === undefined ? "" : data.phone,
     );
-    formData.append("phone", data.phone === undefined ? "" : data.phone);
     formData.append("isSubscribed", String(data.isSubscribed));
 
     reset();
 
     if (file) {
-      formData.append("isFileExists", "true");
-      formData.append("file", file);
-      setFile(null);
-      setPortrait("");
+      formData.append("avatar", file);
     }
 
     const userPatchPromise = updateUserProfile({
       formData,
     }).then((userInfo) => {
-      setUser(userInfo as Parameters<typeof setUser>[0]);
+      const profile = userInfo as {
+        name?: string;
+        imgUrl?: string;
+        telephone?: string;
+        isSubscribed?: boolean;
+      };
+      const nextAvatar = profile.imgUrl || currentAvatar;
+
+      setUser({
+        name: profile.name,
+        nickname: profile.name,
+        phone: profile.telephone,
+        portrait: nextAvatar,
+        image: nextAvatar,
+        isSubscribed: profile.isSubscribed,
+      });
+
+      setFile(null);
+      setPortrait("");
     });
 
     await toast.promise(userPatchPromise, {
@@ -136,31 +164,22 @@ const ProfileForm = () => {
   };
 
   const isSuperAdmin =
-    user?.email === "yusovsky2@gmail.com" ||
+    user?.role === "SUPERADMIN" ||
     user?.originalRole === "SUPERADMIN";
+  const providerAvatar = getLinkedIdentityAvatar(user?.linkedIdentities);
+  const avatarSrc =
+    portrait || user.portrait || user.image || providerAvatar || "";
+  const avatarLabel =
+    (user?.nickname || user?.name || user?.email || "U").trim().charAt(0).toUpperCase();
 
-  const handleViewModeChange = async (
+  const handleViewModeChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const nextViewMode = event.target.value as ViewMode;
 
-    if (!user?.email) {
-      toast.error("User email is required");
-      return;
-    }
-
-    try {
-      await updateUserViewMode({
-        userEmail: user.email,
-        viewMode: nextViewMode,
-      });
-      setViewMode(nextViewMode);
-      setUser({ viewMode: nextViewMode });
-      toast.success("View mode updated");
-      window.location.reload();
-    } catch {
-      toast.error("Failed to update view mode");
-    }
+    setViewMode(nextViewMode);
+    setUser({ viewMode: nextViewMode });
+    toast.success("View mode updated");
   };
 
   return (
@@ -170,17 +189,16 @@ const ProfileForm = () => {
           <p className="w-[323px] text-cadetblue">Profile photo</p>
           <div
             id="thumb"
-            className="relative h-[70px] w-[70px] overflow-hidden rounded-full border-[1px]"
+            className="relative flex h-[70px] w-[70px] items-center justify-center overflow-hidden rounded-full border-[1px] bg-localcream text-[22px] font-semibold text-localbrown"
           >
-            {(portrait || user.portrait || user.image) && (
-              <Image
-                src={portrait || user.portrait || user.image}
+            {avatarSrc && (
+              <img
+                src={avatarSrc}
                 alt="User portrait"
-                width={70}
-                height={70}
                 className="h-full w-full object-cover object-center"
               />
             )}
+            {!avatarSrc && <span aria-hidden="true">{avatarLabel}</span>}
           </div>
           <button
             type="button"

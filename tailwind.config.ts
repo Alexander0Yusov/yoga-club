@@ -12,14 +12,15 @@ const config: Config = {
   theme: {
     // MEDIA QUERIES
     screens: {
-      w480: "480px",
-      w768: "768px",
-      w1280: "1280px",
-      w1440: "1440px",
+      sm: "292px",
+      md: "708px",
+      lg: "1382px",
+      xl: "1440px",
 
-      smOnly: { max: "767.98px" },
-      mdOnly: { min: "768px", max: "1279.98px" },
-      notXl: { max: "1279.98px" },
+      smOnly: { max: "707.98px" },
+      mdOnly: { min: "708px", max: "1381.98px" },
+      lgOnly: { min: "1382px", max: "1439.98px" },
+      notXl: { max: "1439.98px" },
     },
 
     extend: {

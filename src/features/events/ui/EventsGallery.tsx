@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
 import FormCreateEvent from "./FormCreateEvent";
@@ -13,6 +13,8 @@ import {
   toggleEventVisibility,
 } from "@/shared/api/client";
 import EventsItem from "./EventsItem";
+import Container from "@/shared/ui/Container/Container";
+import EventsTopPanel from "./EventsTopPanel";
 
 type EventRow = {
   _id: string;
@@ -22,7 +24,9 @@ type EventRow = {
   timeTarget?: string;
   description?: string;
   imageUrl?: string;
-  picsArray?: { value: string }[];
+  instagramUrl?: string;
+  endTimeTarget?: string;
+  picsArray?: { value: string; alt?: string }[];
   defaultImg?: number;
   isActive?: boolean;
   deletedAt?: string | null;
@@ -31,9 +35,20 @@ type EventRow = {
 type EventsGalleryProps = {
   events?: EventRow[];
   linkToDetail?: boolean;
+  lang?: string;
+  showRouteTabs?: boolean;
+  activeTab?: "upcoming" | "archive";
+  displayMode?: "upcoming" | "archive";
 };
 
-const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGalleryProps) => {
+const EventsGallery = ({
+  events: externalEvents,
+  linkToDetail = true,
+  lang,
+  showRouteTabs = false,
+  activeTab = "upcoming",
+  displayMode,
+}: EventsGalleryProps) => {
   const user = useStore((state) => state.user);
   const { isFormEventOpen, setIsFormEventOpen } = useStore();
   const [events, setEvents] = useState<EventRow[]>(externalEvents || []);
@@ -42,12 +57,29 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
   const currentViewMode = user?.viewMode || user?.role || "USER";
 
   const isSuperAdmin =
-    user?.email === "yusovsky2@gmail.com" ||
+    user?.role === "SUPERADMIN" ||
     user?.originalRole === "SUPERADMIN";
   const canModerate = currentViewMode === "ADMIN" || currentViewMode === "SUPERADMIN";
   const canHardDelete = isSuperAdmin;
 
-  const reloadEvents = async () => {
+  const filteredEvents =
+    displayMode === "upcoming"
+      ? events.filter((event) => {
+          const targetDate = new Date(
+            event.endTimeTarget || event.date || event.timeTarget || ""
+          );
+          return Number.isNaN(targetDate.getTime()) ? false : targetDate.getTime() >= Date.now();
+        })
+      : displayMode === "archive"
+        ? events.filter((event) => {
+            const targetDate = new Date(
+              event.endTimeTarget || event.date || event.timeTarget || ""
+            );
+            return Number.isNaN(targetDate.getTime()) ? false : targetDate.getTime() < Date.now();
+          })
+        : events;
+
+  const reloadEvents = useCallback(async () => {
     if (externalEvents?.length) {
       return;
     }
@@ -57,7 +89,7 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
       showTrash: showTrash && isSuperAdmin,
     });
     setEvents(result);
-  };
+  }, [currentViewMode, externalEvents?.length, isSuperAdmin, showTrash]);
 
   useEffect(() => {
     if (externalEvents?.length) {
@@ -66,7 +98,7 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
     }
 
     void reloadEvents();
-  }, [externalEvents, currentViewMode, isSuperAdmin, showTrash]);
+  }, [externalEvents, reloadEvents]);
 
   const openEditModal = (id: string) => {
     const event = events.find((item) => item._id === id) || null;
@@ -135,7 +167,11 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
   };
 
   return (
-    <div className="space-y-5">
+    <Container className="space-y-5 py-10">
+      {showRouteTabs && lang && (
+        <EventsTopPanel lang={lang as any} activeTab={activeTab} />
+      )}
+
       {canModerate && (
         <div className="flex flex-wrap items-center gap-3">
           {isSuperAdmin && (
@@ -161,9 +197,10 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
       )}
 
       <ul className="flex flex-col gap-4">
-        {events.map((item) => (
+        {filteredEvents.map((item) => (
           <li key={item._id}>
             <EventsItem
+              lang={lang}
               id={item._id}
               slug={item.slug}
               title={item.title || "Untitled event"}
@@ -171,6 +208,8 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
               timeTarget={item.timeTarget}
               description={item.description}
               imageUrl={item.imageUrl}
+              instagramUrl={item.instagramUrl}
+              endTimeTarget={item.endTimeTarget}
               picsArray={item.picsArray}
               defaultImg={item.defaultImg}
               isActive={item.isActive !== false}
@@ -192,13 +231,18 @@ const EventsGallery = ({ events: externalEvents, linkToDetail = true }: EventsGa
         <FormCreateEvent
           id={selectedEvent?._id}
           timeTarget={selectedEvent?.timeTarget || selectedEvent?.date}
+          endTimeTarget={selectedEvent?.endTimeTarget}
           title={selectedEvent?.title}
           description={selectedEvent?.description}
-          picsArray={selectedEvent?.picsArray as { id: string; value: string }[]}
+          instagramUrl={selectedEvent?.instagramUrl}
+          picsArray={
+            selectedEvent?.picsArray as { id: string; value: string; alt?: string }[]
+          }
           defaultImg={selectedEvent?.defaultImg}
+          onSaved={() => void reloadEvents()}
         />
       </ModalWindow>
-    </div>
+    </Container>
   );
 };
 

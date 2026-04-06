@@ -110,6 +110,9 @@ authProviders.push(
 export const authConfig: AuthOptions = {
   secret: NEXTAUTH_SECRET,
   adapter: MongoDBAdapter(clientPromise as any),
+  session: {
+    strategy: "jwt",
+  },
   providers: authProviders as AuthOptions["providers"],
   callbacks: {
     async signIn({ user }) {

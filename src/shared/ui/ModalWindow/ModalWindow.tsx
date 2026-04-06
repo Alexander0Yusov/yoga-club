@@ -18,7 +18,7 @@ export const ModalWindow: React.FC<ModalWindowProps> = ({
     <Portal onModalClose={onModalClose} showModal={showModal}>
       <div
         className={
-          `container border-[1px] border-lilac rounded-[20px] relative z-40 my-10 bg-[#dfd9dc] px-[10px] pb-8 pt-[60px] md:px-4 xl:w-[1220px] xl:px-6 ` +
+          `container border-[1px] border-lilac rounded-[20px] relative z-40 my-10 bg-[#dfd9dc] px-[10px] pb-8 pt-[60px] md:px-4 lg:w-[1220px] lg:px-6 ` +
           className
         }
       >
@@ -36,7 +36,7 @@ export const ModalWindow: React.FC<ModalWindowProps> = ({
           <IconClose className="h-[30px] w-[30px]" />
         </button>
         <div
-          className="max-h-[calc(100vh-80px-60px-32px)] overflow-auto px-[10px] md:px-4 xl:px-6"
+          className="max-h-[calc(100vh-80px-60px-32px)] overflow-auto px-[10px] md:px-4 lg:px-6"
         >
           {children}
         </div>

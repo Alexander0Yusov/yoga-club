@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { i18nConfig, type LocaleT } from "@/i18nConfig";
+import ButtonToTop from "@/shared/ui/ButtonToTop";
 import Footer from "@/widgets/footer/Footer";
 import Header from "@/widgets/header/Header";
 
@@ -17,13 +18,15 @@ export default function LangLayout({
 }) {
   return (
     <div
+      id="top"
       lang={params.lang}
       data-lang={params.lang}
-      className="min-h-screen bg-white text-[#2f1815]"
+      className="relative flex min-h-screen flex-col bg-white text-[#2f1815]"
     >
       <Header lang={params.lang} />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer lang={params.lang} />
+      <ButtonToTop />
     </div>
   );
 }

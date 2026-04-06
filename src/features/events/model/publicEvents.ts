@@ -7,10 +7,12 @@ export type PublicEventRow = {
   description?: string;
   date?: string;
   timeTarget?: string;
+  endTimeTarget?: string;
   location?: string;
   price?: string | number;
   imageUrl?: string;
-  picsArray?: { _id?: string; value: string }[];
+  instagramUrl?: string;
+  picsArray?: { _id?: string; value: string; alt?: string }[];
   defaultImg?: number;
   isActive?: boolean;
   deletedAt?: string | null;
@@ -22,11 +24,14 @@ export const isVisibleEvent = (event: PublicEventRow) =>
 export const toEventDate = (event: PublicEventRow) =>
   new Date(event.date || event.timeTarget || "");
 
+export const toEventEndDate = (event: PublicEventRow) =>
+  new Date(event.endTimeTarget || event.date || event.timeTarget || "");
+
 export const isUpcomingEvent = (event: PublicEventRow) =>
-  isVisibleEvent(event) && toEventDate(event).getTime() >= Date.now();
+  isVisibleEvent(event) && toEventEndDate(event).getTime() >= Date.now();
 
 export const isArchiveEvent = (event: PublicEventRow) =>
-  isVisibleEvent(event) && toEventDate(event).getTime() < Date.now();
+  isVisibleEvent(event) && toEventEndDate(event).getTime() < Date.now();
 
 export async function fetchPublicEvents(siteUrl: string) {
   try {

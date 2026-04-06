@@ -195,3 +195,8 @@ src/
 - [ ] Admin Checkbox ("Assign Admin") in users list is implemented and bound to role mutation.
 - [ ] Entity editing modals in `features/` or `shared/ui/` are restored.
 - [x] Global feedback soft hide/restore flow is implemented end-to-end.
+
+## Lazy Figma References
+
+- UI kit components: `1401:5135` — использовать точечно, без ранней библиотеки, пока не потребуется реальный компонент.
+- Account page: `1401:4159` — эталон для постепенной доводки `/account` без дублирования старого профиля.

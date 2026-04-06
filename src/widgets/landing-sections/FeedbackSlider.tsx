@@ -10,6 +10,7 @@ import { ModalWindow } from "@/shared/ui/ModalWindow/ModalWindow";
 import Arrow from "@/shared/ui/Arrow";
 import { getFeedbacks } from "@/shared/api/client";
 
+import styles from "./FeedbackSlider.module.css";
 import "swiper/css";
 import "swiper/css/autoplay";
 import "swiper/css/keyboard";
@@ -195,10 +196,10 @@ export default function FeedbackSlider({ data }: FeedbackSliderProps) {
         slideToClickedSlide={true}
         slidesPerView="auto"
         spaceBetween={24}
-        className="mx-auto mb-6 w-full"
+        className={`${styles.avatars} mx-auto mb-6 w-full`}
       >
         {items.map((item, index) => (
-          <SwiperSlide key={item._id || item.authorName} className="!w-auto">
+          <SwiperSlide key={item._id || item.authorName} className={styles.avatarSlide}>
             <button
               type="button"
               onClick={() =>
@@ -226,7 +227,7 @@ export default function FeedbackSlider({ data }: FeedbackSliderProps) {
 
         <div className="flex h-[176px] w-full flex-col rounded-[18px] border border-[#d9c9c2] bg-white px-6 py-5 text-center shadow-[0_1px_0_rgba(0,0,0,0.02)] md:px-10 md:py-7">
           <div className="flex-1">
-            <p className="feedback-slider__excerpt text-[15px] leading-[1.45] text-[#2c2c2c] md:text-[17px]">
+            <p className={`${styles.excerpt} text-[15px] leading-[1.45] text-[#2c2c2c] md:text-[17px]`}>
               {activeItem?.comment || activeItem?.text || ""}
             </p>
             {((activeItem?.comment || activeItem?.text || "").length > 140) && (
@@ -245,7 +246,7 @@ export default function FeedbackSlider({ data }: FeedbackSliderProps) {
             )}
           </div>
 
-          <p className="mt-auto text-[8px]">
+          <p className="mt-auto text-[8px] text-[#444]">
             {activeItem?.date ? formatIsoDate(activeItem.date) : ""}
           </p>
         </div>

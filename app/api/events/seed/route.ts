@@ -86,6 +86,9 @@ const mocks = [
   },
 ];
 
+const withEndTime = (date: Date, durationHours: number) =>
+  new Date(date.getTime() + durationHours * 60 * 60 * 1000).toISOString();
+
 export async function POST() {
   await connectToDatabase();
 
@@ -103,13 +106,15 @@ export async function POST() {
       location: "Yoga Club Studio",
       price: "Free",
       imageUrl: imageUrl(index),
+      instagramUrl: `https://instagram.com/yoga.club.${index + 1}`,
       isFeatured: index < 2,
       landingIndex: index,
       isActive: item.isActive !== false,
       deletedAt: item.deletedAt || null,
-      picsArray: [{ value: imageUrl(index) }],
+      picsArray: [{ value: imageUrl(index), alt: item.title }],
       defaultImg: index % events_lib.length,
-      timeTarget: item.date.toISOString().slice(0, 10),
+      timeTarget: item.date.toISOString(),
+      endTimeTarget: withEndTime(item.date, 2),
     }))
   );
 

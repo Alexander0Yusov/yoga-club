@@ -1,8 +1,12 @@
 import { StateCreator } from "zustand";
 
-import { getCurrentUser } from "@/shared/api/client";
+import { ROLE_HIERARCHY, type Role } from "@/entities/permissions/model/types";
+import {
+  SessionExpiredError,
+  fetchSessionUserWithAutoRefresh,
+} from "@/shared/auth/backend-session";
 
-type UserRole = "USER" | "ADMIN" | "SUPERADMIN";
+type UserRole = Role;
 const VIEW_MODE_KEY = "yoga_club_view_mode";
 
 type User = {
@@ -11,6 +15,13 @@ type User = {
   email: string;
   image: string;
   portrait: string;
+  platformName?: string;
+  platformImgUrl?: string;
+  linkedIdentities?: Array<{
+    provider: string;
+    providerAvatarUrl?: string;
+    providerName?: string;
+  }>;
   phone: string;
   isSubscribed: boolean;
   isAdmin: boolean;
@@ -63,15 +74,27 @@ const getSavedViewMode = (): UserRole | null => {
   return null;
 };
 
+const canUseViewMode = (user: Partial<User>, viewMode: UserRole): boolean => {
+  const role = user.role || user.originalRole || "USER";
+
+  return ROLE_HIERARCHY[role].includes(viewMode);
+};
+
 const isSuperAdminAuthority = (user: Partial<User>): boolean =>
-  user?.email === "yusovsky2@gmail.com" || user?.originalRole === "SUPERADMIN";
+  user?.role === "SUPERADMIN" || user?.originalRole === "SUPERADMIN";
 
 const normalizeUser = (user: Partial<User>): User => {
   const normalizedRole: UserRole = user.role || (user.isAdmin ? "ADMIN" : "USER");
   const normalizedOriginalRole: UserRole = user.originalRole || normalizedRole;
   const savedViewMode = getSavedViewMode();
-  const normalizedViewMode: UserRole =
-    savedViewMode || user.viewMode || normalizedRole;
+  const requestedViewMode = savedViewMode || user.viewMode || normalizedRole;
+  const normalizedViewMode: UserRole = canUseViewMode({
+    ...user,
+    role: normalizedRole,
+    originalRole: normalizedOriginalRole,
+  }, requestedViewMode)
+    ? requestedViewMode
+    : normalizedRole;
   const isSuperAdmin = isSuperAdminAuthority({
     ...user,
     originalRole: normalizedOriginalRole,
@@ -96,30 +119,55 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   user: { ...initialUser },
   setUser: (newUser: Partial<User>) =>
     set((state) => ({ user: normalizeUser({ ...state.user, ...newUser }) })),
-  setViewMode: (viewMode: UserRole) => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(VIEW_MODE_KEY, viewMode);
-    }
+  setViewMode: (viewMode: UserRole) =>
+    set((state) => {
+      const effectiveViewMode = canUseViewMode(state.user, viewMode)
+        ? viewMode
+        : state.user.role || "USER";
 
-    set((state) => ({ user: { ...state.user, viewMode } }));
-  },
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(VIEW_MODE_KEY, effectiveViewMode);
+      }
+
+      return {
+        user: {
+          ...state.user,
+          viewMode: effectiveViewMode,
+        },
+      };
+    }),
   resetUser: () => set({ user: { ...initialUser } }),
   // async
   getCurrentUser: async () => {
     set({ userStatusLoading: true, userStatusError: null });
     try {
-      const user = (await getCurrentUser()) as Partial<User>;
-      const savedViewMode = getSavedViewMode();
+      const locale =
+        typeof document !== "undefined"
+          ? document.documentElement.lang || "en"
+          : "en";
+      const user = await fetchSessionUserWithAutoRefresh({ locale });
+
+      if (!user) {
+        set({ user: { ...initialUser } });
+        return;
+      }
 
       set({
         user: normalizeUser({
           ...user,
-          viewMode: savedViewMode || user.viewMode,
+          viewMode: user.viewMode || getSavedViewMode() || user.role,
         }),
       });
     } catch (error) {
-      console.error("Error fetching current user:", error);
-      set({ userStatusError: "Error fetching current user" });
+      if (error instanceof SessionExpiredError) {
+        set({
+          user: { ...initialUser },
+          userStatusError: error.code,
+        });
+      } else {
+        console.error("Error fetching current user:", error);
+        set({ userStatusError: "Error fetching current user" });
+      }
     } finally {
       set({ userStatusLoading: false });
     }

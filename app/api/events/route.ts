@@ -1,9 +1,8 @@
-import { authConfig } from "@/configs/auth";
 import { Events } from "@/mongoose/models/Events";
-import { UserInfo } from "@/mongoose/models/UserInfo";
 import mongoose from "mongoose";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
+
+import { getCurrentAuthUser } from "@/shared/auth/mock-auth";
 
 const { MONGO_URL } = process.env;
 
@@ -12,9 +11,6 @@ const connectToDatabase = async () => {
     await mongoose.connect(MONGO_URL as string);
   }
 };
-
-const isSuperAdminEmail = (email?: string | null) =>
-  email?.toLowerCase() === "yusovsky2@gmail.com";
 
 const eventActionSchema = z.discriminatedUnion("action", [
   z.object({
@@ -42,11 +38,13 @@ const eventUpdateSchema = z.object({
   title: z.string().trim().optional(),
   description: z.string().trim().optional(),
   timeTarget: z.string().trim().optional(),
+  endTimeTarget: z.string().trim().optional(),
   date: z.string().trim().optional(),
   slug: z.string().trim().optional(),
   location: z.string().trim().optional(),
   price: z.union([z.string(), z.number()]).optional(),
   imageUrl: z.string().trim().optional(),
+  instagramUrl: z.string().trim().optional(),
   isFeatured: z.boolean().optional(),
   landingIndex: z.number().int().optional(),
   isActive: z.boolean().optional(),
@@ -55,6 +53,7 @@ const eventUpdateSchema = z.object({
     .array(
       z.object({
         value: z.string().min(1),
+        alt: z.string().trim().optional().default(""),
       })
     )
     .optional(),
@@ -70,21 +69,14 @@ function serializeEvent(event: EventRecord) {
   };
 }
 
-async function getRequestRole(email?: string | null) {
-  if (!email) {
+async function getRequestRole() {
+  const user = getCurrentAuthUser();
+
+  if (!user) {
     return "USER" as const;
   }
 
-  if (isSuperAdminEmail(email)) {
-    return "SUPERADMIN" as const;
-  }
-
-  const userInfo = await UserInfo.findOne({ userEmail: email }).lean<{
-    role?: "USER" | "ADMIN" | "SUPERADMIN";
-    viewMode?: "USER" | "ADMIN" | "SUPERADMIN";
-  }>();
-
-  return userInfo?.viewMode || userInfo?.role || "USER";
+  return user.viewMode || user.role || "USER";
 }
 
 function getRequestedViewMode(req?: Request) {
@@ -115,11 +107,7 @@ function resolveEffectiveRole(params: {
 }
 
 function isAuthorized(user: { email?: string | null; role: string }) {
-  return (
-    user.email?.toLowerCase() === "yusovsky2@gmail.com" ||
-    user.role === "ADMIN" ||
-    user.role === "SUPERADMIN"
-  );
+  return user.role === "ADMIN" || user.role === "SUPERADMIN";
 }
 
 function getVisibleFilter(role: "USER" | "ADMIN" | "SUPERADMIN", showTrash: boolean) {
@@ -156,6 +144,8 @@ function normalizeEventPayload(payload: Record<string, unknown>) {
     price: payload.price ?? "",
     imageUrl:
       typeof payload.imageUrl === "string" ? payload.imageUrl.trim() : "",
+    instagramUrl:
+      typeof payload.instagramUrl === "string" ? payload.instagramUrl.trim() : "",
     isFeatured: Boolean(payload.isFeatured),
     landingIndex:
       typeof payload.landingIndex === "number"
@@ -165,7 +155,20 @@ function normalizeEventPayload(payload: Record<string, unknown>) {
     deletedAt: null as Date | null,
     timeTarget:
       typeof payload.timeTarget === "string" ? payload.timeTarget.trim() : "",
-    picsArray: Array.isArray(payload.picsArray) ? payload.picsArray : [],
+    endTimeTarget:
+      typeof payload.endTimeTarget === "string" ? payload.endTimeTarget.trim() : "",
+    picsArray: Array.isArray(payload.picsArray)
+      ? payload.picsArray.map((item) => ({
+          value:
+            item && typeof item === "object" && "value" in item && typeof item.value === "string"
+              ? item.value
+              : "",
+          alt:
+            item && typeof item === "object" && "alt" in item && typeof item.alt === "string"
+              ? item.alt
+              : "",
+        }))
+      : [],
     defaultImg:
       typeof payload.defaultImg === "number"
         ? payload.defaultImg
@@ -185,8 +188,8 @@ function normalizeSlug(value?: string | null) {
 export async function POST(req: Request) {
   await connectToDatabase();
 
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
+  const currentUser = getCurrentAuthUser();
+  const email = currentUser?.email;
 
   if (!email) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -209,9 +212,9 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   await connectToDatabase();
 
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
-  const role = await getRequestRole(email);
+  const currentUser = getCurrentAuthUser();
+  const email = currentUser?.email;
+  const role = await getRequestRole();
   const requestedViewMode = getRequestedViewMode(req);
   const effectiveRole = resolveEffectiveRole({
     sessionRole: role,
@@ -232,9 +235,9 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   await connectToDatabase();
 
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
-  const role = await getRequestRole(email);
+  const currentUser = getCurrentAuthUser();
+  const email = currentUser?.email;
+  const role = await getRequestRole();
   const requestedViewMode = getRequestedViewMode(req);
   const effectiveRole = resolveEffectiveRole({
     sessionRole: role,
@@ -255,7 +258,7 @@ export async function PATCH(req: Request) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (payload.action === "hardDelete" && email?.toLowerCase() !== "yusovsky2@gmail.com") {
+    if (payload.action === "hardDelete" && effectiveRole !== "SUPERADMIN") {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -298,11 +301,13 @@ export async function PATCH(req: Request) {
   if (payload.title !== undefined) event.title = payload.title;
   if (payload.description !== undefined) event.description = payload.description;
   if (payload.timeTarget !== undefined) event.timeTarget = payload.timeTarget;
+  if (payload.endTimeTarget !== undefined) event.endTimeTarget = payload.endTimeTarget;
   if (payload.date !== undefined) event.date = new Date(payload.date);
   if (payload.slug !== undefined) event.slug = normalizeSlug(payload.slug);
   if (payload.location !== undefined) event.location = payload.location;
   if (payload.price !== undefined) event.price = payload.price;
   if (payload.imageUrl !== undefined) event.imageUrl = payload.imageUrl;
+  if (payload.instagramUrl !== undefined) event.instagramUrl = payload.instagramUrl;
   if (payload.isFeatured !== undefined) event.isFeatured = payload.isFeatured;
   if (payload.landingIndex !== undefined) event.landingIndex = payload.landingIndex;
   if (payload.isActive !== undefined) event.isActive = payload.isActive;
@@ -322,11 +327,11 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   await connectToDatabase();
 
-  const session = await getServerSession(authConfig);
-  const email = session?.user?.email;
+  const currentUser = getCurrentAuthUser();
+  const email = currentUser?.email;
   const body = (await req.json()) as { _id?: string };
 
-  if (email?.toLowerCase() !== "yusovsky2@gmail.com") {
+  if (currentUser?.role !== "SUPERADMIN") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

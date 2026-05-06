@@ -28,7 +28,8 @@ export default async function LandingSections({ lang }: { lang: string }) {
       getSections({ locale: lang }),
     ]);
 
-    heroIntro = heroIntros[0] ?? null;
+    heroIntro =
+      heroIntros.find((item) => item.isActive) ?? heroIntros[0] ?? null;
     practiceBenefit = practiceBenefits[0] ?? null;
     heroSection =
       sections.find((item) => item.for === "hero_intro") ?? null;

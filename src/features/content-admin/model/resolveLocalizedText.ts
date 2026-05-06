@@ -1,4 +1,5 @@
 import type { LocalizedTextPayload } from "@/shared/api/client";
+import { unwrapLocalizedText } from "@/features/content-admin/model/localizedTextForm";
 
 const FALLBACK_LOCALES = ["ru", "en", "uk", "de"] as const;
 
@@ -19,6 +20,14 @@ export function resolveLocalizedText(
   locale?: string,
   fallback = ""
 ): string {
+  const unwrappedValue = unwrapLocalizedText(value);
+
+  if (typeof unwrappedValue === "string") {
+    return unwrappedValue;
+  }
+
+  value = unwrappedValue ?? value;
+
   if (!value) {
     return fallback;
   }

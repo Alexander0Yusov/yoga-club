@@ -81,7 +81,6 @@ function buildHeaders(locale?: string, accessToken?: string): Headers {
   const normalizedLocale = normalizeBackendLocale(locale);
 
   headers.set("Accept-Language", normalizedLocale);
-  headers.set("x-client-lang", normalizedLocale);
 
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);

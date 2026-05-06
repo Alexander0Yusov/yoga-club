@@ -24,12 +24,8 @@ export function buildContentBackendHeaders(req: NextRequest): Headers {
     : cookieLanguage
       ? normalizeLocale(cookieLanguage)
       : resolveLocaleFromAcceptLanguage(req.headers.get("accept-language"));
-  const clientLanguage = normalizeLocale(
-    req.headers.get("x-client-lang") || cookieLanguage || queryLanguage || acceptLanguage,
-  );
 
   headers.set("Accept-Language", acceptLanguage);
-  headers.set("x-client-lang", clientLanguage);
 
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);

@@ -194,7 +194,19 @@ src/
 
 - [ ] Admin Checkbox ("Assign Admin") in users list is implemented and bound to role mutation.
 - [ ] Entity editing modals in `features/` or `shared/ui/` are restored.
-- [x] Global feedback soft hide/restore flow is implemented end-to-end.
+Журнал добрых дел
+
+- [x] Мультиязычные CMS-формы переведены на вкладки локалей для `HeroIntro`, `Section` и `PracticeBenefit`.
+  - Добавлен заголовок `X-Raw-Langs: true` для admin content requests.
+  - Состояние локалей хранится целиком в `react-hook-form`, чтобы значения не терялись при переключении вкладок.
+  - В полях ввода добавлен визуальный бейдж текущего языка.
+  - Статус: выполнено.
+
+- [x] Синхронизация языка и приоритеты источников приведены к контракту backend.
+  - Приоритет источников: `lang_synced` cookie, затем URL prefix, затем browser headers (`Accept-Language` / `navigator.language`).
+  - Мы убрали конкурирующий client-side sync loop и сделали middleware единственным redirect-механизмом, что убрало bounce-back race condition.
+  - Технический долг остаётся в legacy helper-ветках auth/admin, поэтому к теме, возможно, придётся вернуться при появлении новых источников языка.
+  - Статус: готово, с небольшим риском на будущие refresh/persist-сценарии.
 
 ## Lazy Figma References
 

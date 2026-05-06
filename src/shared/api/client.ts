@@ -53,7 +53,6 @@ function buildHeaders(headers: HeadersInit | undefined, locale: string): Headers
   const normalizedLocale = normalizeBackendLocale(locale);
 
   nextHeaders.set("Accept-Language", normalizedLocale);
-  nextHeaders.set("x-client-lang", normalizedLocale);
 
   if (!nextHeaders.has("Content-Type")) {
     nextHeaders.set("Content-Type", "application/json");
@@ -140,7 +139,6 @@ function buildLocalHeaders(
   const normalizedLocale = normalizeBackendLocale(locale);
 
   nextHeaders.set("Accept-Language", normalizedLocale);
-  nextHeaders.set("x-client-lang", normalizedLocale);
 
   if (!(body instanceof FormData) && body !== undefined && !(nextHeaders.get("Content-Type") || "").length) {
     nextHeaders.set("Content-Type", "application/json");
@@ -1013,6 +1011,7 @@ export interface HeroIntroRecord {
   title: LocalizedTextValue;
   text1: LocalizedTextValue;
   text2: LocalizedTextValue;
+  imageAlt?: LocalizedTextValue;
   image?: {
     url: string;
     alt?: LocalizedTextValue;
@@ -1076,6 +1075,21 @@ export async function getHeroIntros<T = HeroIntroRecord[]>({
   });
 }
 
+export async function getHeroIntroById<T = HeroIntroRecord>({
+  id,
+  locale,
+}: {
+  id: string;
+  locale?: string;
+}): Promise<T> {
+  return contentRequest<T>({
+    path: `/hero-intro/${id}`,
+    method: "GET",
+    locale,
+    cache: "no-store",
+  });
+}
+
 export async function getPracticeBenefits<T = PracticeBenefitRecord[]>({
   locale,
 }: {
@@ -1108,9 +1122,10 @@ export interface SaveHeroIntroInput {
   id?: string;
   locale?: string;
   isActive: boolean;
-  title: Record<string, string>;
-  text1: Record<string, string>;
-  text2: Record<string, string>;
+  title: LocalizedTextPayload;
+  text1: LocalizedTextPayload;
+  text2: LocalizedTextPayload;
+  imageAlt?: LocalizedTextPayload;
   image?: File | null;
 }
 
@@ -1121,35 +1136,29 @@ export async function saveHeroIntro<T = HeroIntroRecord>({
   title,
   text1,
   text2,
+  imageAlt,
   image,
 }: SaveHeroIntroInput): Promise<T> {
+  const formData = new FormData();
+
+  formData.append("title", JSON.stringify(title));
+  formData.append("text1", JSON.stringify(text1));
+  formData.append("text2", JSON.stringify(text2));
+  formData.append("isActive", JSON.stringify(isActive));
+
+  if (imageAlt) {
+    formData.append("imageAlt", JSON.stringify(imageAlt));
+  }
+
   if (image) {
-    const formData = new FormData();
-
-    formData.append("title", JSON.stringify(title));
-    formData.append("text1", JSON.stringify(text1));
-    formData.append("text2", JSON.stringify(text2));
-    formData.append("isActive", JSON.stringify(isActive));
     formData.append("image", image);
-
-    return localRequest<T>({
-      path: id ? `/api/hero-intro/${id}` : "/api/hero-intro",
-      method: id ? "PUT" : "POST",
-      locale,
-      body: formData,
-    });
   }
 
   return localRequest<T>({
     path: id ? `/api/hero-intro/${id}` : "/api/hero-intro",
     method: id ? "PUT" : "POST",
     locale,
-    body: {
-      title,
-      text1,
-      text2,
-      isActive,
-    },
+    body: formData,
   });
 }
 
@@ -1167,6 +1176,7 @@ export interface SavePracticeBenefitInput {
   text_8?: LocalizedTextPayload;
   text_9?: LocalizedTextPayload;
   text_10?: LocalizedTextPayload;
+  imageAlt?: LocalizedTextPayload;
   image?: File | null;
 }
 
@@ -1184,12 +1194,17 @@ export async function savePracticeBenefit<T = PracticeBenefitRecord>({
   text_8,
   text_9,
   text_10,
+  imageAlt,
   image,
 }: SavePracticeBenefitInput): Promise<T> {
   const formData = new FormData();
 
   formData.append("text_1", JSON.stringify(text_1));
   formData.append("isActive", JSON.stringify(isActive));
+
+  if (imageAlt) {
+    formData.append("imageAlt", JSON.stringify(imageAlt));
+  }
 
   if (text_2) {
     formData.append("text_2", JSON.stringify(text_2));
@@ -1270,9 +1285,9 @@ export async function softDeleteHeroIntro<T = unknown>({
 export interface SaveSectionInput {
   id?: string;
   locale?: string;
-  title: Record<string, string>;
-  subtitle_1?: Record<string, string>;
-  subtitle_2?: Record<string, string>;
+  title: LocalizedTextPayload;
+  subtitle_1?: LocalizedTextPayload;
+  subtitle_2?: LocalizedTextPayload;
   for: string;
   orderIndex: number;
   isActive: boolean;

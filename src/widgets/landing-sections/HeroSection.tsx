@@ -8,6 +8,7 @@ import HeroSectionAdminControls from "@/features/content-admin/ui/HeroSectionAdm
 import HeroSectionEntitySettingsTrigger from "@/features/content-admin/ui/HeroSectionEntitySettingsTrigger";
 import type { HeroIntroRecord, SectionRecord } from "@/shared/api/client";
 import Container from "@/shared/ui/Container/Container";
+import { resolveLocalizedText } from "@/features/content-admin/model/resolveLocalizedText";
 
 type HeroSectionProps = {
   lang: string;
@@ -20,21 +21,27 @@ export default function HeroSection({
   heroIntro,
   section,
 }: HeroSectionProps) {
-  const title =
-    typeof heroIntro?.title === "string"
-      ? heroIntro.title
-      : "Онлайн заняття йогою";
-  const text1 =
-    typeof heroIntro?.text1 === "string"
-      ? heroIntro.text1
-      : "Ваш шлях до гармонії тіла і душі";
-  const text2 =
-    typeof heroIntro?.text2 === "string"
-      ? heroIntro.text2
-      : "Приєднуйтеся до нашої команди. Перше заняття онлайн — безкоштовно. Практика для тіла, дихання й поступового відновлення ресурсу без зайвого шуму та паралельних інтерфейсів.";
+  const title = resolveLocalizedText(
+    heroIntro?.title,
+    lang,
+    "Онлайн заняття йогою"
+  );
+  const text1 = resolveLocalizedText(
+    heroIntro?.text1,
+    lang,
+    "Ваш шлях до гармонії тіла і душі"
+  );
+  const text2 = resolveLocalizedText(
+    heroIntro?.text2,
+    lang,
+    "Приєднуйтеся до нашої команди. Перше заняття онлайн — безкоштовно. Практика для тіла, дихання й поступового відновлення ресурсу без зайвого шуму та паралельних інтерфейсів."
+  );
   const heroImageUrl = heroIntro?.image?.url || "";
-  const heroImageAlt =
-    typeof heroIntro?.image?.alt === "string" ? heroIntro.image.alt : title;
+  const heroImageAlt = resolveLocalizedText(
+    heroIntro?.imageAlt ?? heroIntro?.image?.alt,
+    lang,
+    title
+  );
 
   return (
     <section

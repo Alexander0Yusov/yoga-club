@@ -1,9 +1,11 @@
-﻿"use client";
+"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 import type { HeroIntroRecord } from "@/shared/api/client";
+import { getHeroIntroById } from "@/shared/api/client";
 import useStore from "@/store/a_store";
 import IconPlus from "@/shared/ui/IconPlus";
 import IconEdit from "@/shared/ui/IconEdit";
@@ -27,9 +29,17 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
   const [heroCreateOpen, setHeroCreateOpen] = useState(false);
   const [heroEditOpen, setHeroEditOpen] = useState(false);
   const [heroDeleteOpen, setHeroDeleteOpen] = useState(false);
+  const [editingHeroIntro, setEditingHeroIntro] = useState<HeroIntroRecord | null>(null);
+  const [isHydratingEdit, setIsHydratingEdit] = useState(false);
 
   const heroId = getHeroIntroId(heroIntro);
   const hasHero = Boolean(heroId);
+
+  useEffect(() => {
+    if (!heroEditOpen) {
+      setEditingHeroIntro(heroIntro ?? null);
+    }
+  }, [heroEditOpen, heroIntro]);
 
   const refreshPage = useMemo(
     () => () => {
@@ -37,6 +47,28 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
     },
     [router]
   );
+
+  const handleOpenEdit = async () => {
+    if (!heroId) {
+      return;
+    }
+
+    setEditingHeroIntro(null);
+    setHeroEditOpen(true);
+    setIsHydratingEdit(true);
+
+    try {
+      const record = await getHeroIntroById({
+        id: heroId,
+      });
+
+      setEditingHeroIntro(record);
+    } catch {
+      toast.error("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ hero");
+    } finally {
+      setIsHydratingEdit(false);
+    }
+  };
 
   if (!isAdmin) {
     return null;
@@ -47,7 +79,7 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
       <div className="pointer-events-none absolute left-0 top-[-47px] z-[70] flex items-center gap-[93px]">
         <div className="pointer-events-auto">
           <AdminCircleButton
-            label="Добавить hero"
+            label="Р”РѕР±Р°РІРёС‚СЊ hero"
             onClick={() => setHeroCreateOpen(true)}
           >
             <IconPlus className="h-[36px] w-[36px] text-localbrown" />
@@ -55,8 +87,8 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
         </div>
         <div className="pointer-events-auto">
           <AdminCircleButton
-            label="Редактировать hero"
-            onClick={() => setHeroEditOpen(true)}
+            label="Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ hero"
+            onClick={() => void handleOpenEdit()}
             disabled={!hasHero}
           >
             <IconEdit className="h-[36px] w-[36px]" />
@@ -64,7 +96,7 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
         </div>
         <div className="pointer-events-auto">
           <AdminCircleButton
-            label="Удалить hero"
+            label="РЈРґР°Р»РёС‚СЊ hero"
             onClick={() => setHeroDeleteOpen(true)}
             disabled={!hasHero}
           >
@@ -86,7 +118,8 @@ export default function HeroSectionAdminControls({ lang, heroIntro }: Props) {
         onClose={() => setHeroEditOpen(false)}
         onSaved={refreshPage}
         lang={lang}
-        heroIntro={heroIntro}
+        heroIntro={editingHeroIntro}
+        isHydrating={isHydratingEdit}
         mode="edit"
       />
 

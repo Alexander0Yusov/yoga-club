@@ -4,11 +4,12 @@ import { useMemo } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import toast from "react-hot-toast";
 
-import { createLocalizedTextPayload } from "@/features/content-admin/model/resolveLocalizedText";
 import { saveSection } from "@/shared/api/client";
 import {
   type SectionContentType,
 } from "@/modules/sections/contracts/section.contract";
+
+import { normalizeLocalizedDraft } from "@/features/content-admin/model/localizedTextForm";
 
 import SectionEntityForm, {
   type SectionEntityFormValues,
@@ -29,9 +30,9 @@ export default function SectionEntityCreateModal({
 }: Props) {
   const initialValues = useMemo<SectionEntityFormValues>(
     () => ({
-      title: "",
-      subtitle_1: "",
-      subtitle_2: "",
+      title: normalizeLocalizedDraft(),
+      subtitle_1: normalizeLocalizedDraft(),
+      subtitle_2: normalizeLocalizedDraft(),
       for: "",
       orderIndex: 0,
       isActive: true,
@@ -43,13 +44,9 @@ export default function SectionEntityCreateModal({
     await toast.promise(
       saveSection({
         locale: lang,
-        title: createLocalizedTextPayload(values.title, lang),
-        subtitle_1: values.subtitle_1.trim()
-          ? createLocalizedTextPayload(values.subtitle_1.trim(), lang)
-          : undefined,
-        subtitle_2: values.subtitle_2.trim()
-          ? createLocalizedTextPayload(values.subtitle_2.trim(), lang)
-          : undefined,
+        title: values.title,
+        subtitle_1: values.subtitle_1,
+        subtitle_2: values.subtitle_2,
         for: values.for as SectionContentType,
         orderIndex: values.orderIndex,
         isActive: Boolean(values.isActive),

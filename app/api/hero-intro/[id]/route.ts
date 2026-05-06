@@ -15,6 +15,18 @@ type Params = {
   };
 };
 
+export async function GET(req: NextRequest, { params }: Params) {
+  const response = await fetch(
+    `${CONTENT_BACKEND_BASE_URL}/hero-intro/${params.id}`,
+    {
+      method: "GET",
+      headers: buildContentBackendHeaders(req),
+    }
+  );
+
+  return proxyResponse(response);
+}
+
 async function forwardHeroIntroRequest(
   req: NextRequest,
   id: string,

@@ -4,10 +4,7 @@ import { useMemo } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import toast from "react-hot-toast";
 
-import {
-  mergeLocalizedTextPayload,
-  resolveLocalizedText,
-} from "@/features/content-admin/model/resolveLocalizedText";
+import { normalizeLocalizedDraft } from "@/features/content-admin/model/localizedTextForm";
 import { saveSection, type SectionRecord } from "@/shared/api/client";
 import { type SectionContentType } from "@/modules/sections/contracts/section.contract";
 
@@ -32,14 +29,14 @@ export default function SectionSettingsModal({
 }: Props) {
   const initialValues = useMemo<SectionEntityFormValues>(
     () => ({
-      title: resolveLocalizedText(section?.title, lang, ""),
-      subtitle_1: resolveLocalizedText(section?.subtitle_1, lang, ""),
-      subtitle_2: resolveLocalizedText(section?.subtitle_2, lang, ""),
+      title: normalizeLocalizedDraft(section?.title),
+      subtitle_1: normalizeLocalizedDraft(section?.subtitle_1),
+      subtitle_2: normalizeLocalizedDraft(section?.subtitle_2),
       for: typeof section?.for === "string" ? section.for : "",
       orderIndex: section?.orderIndex ?? 0,
       isActive: section?.isActive ?? true,
     }),
-    [lang, section]
+    [section]
   );
 
   const onSubmit: SubmitHandler<SectionEntityFormValues> = async (values) => {
@@ -49,21 +46,9 @@ export default function SectionSettingsModal({
       saveSection({
         id: sectionId,
         locale: lang,
-        title: mergeLocalizedTextPayload(section?.title, values.title, lang),
-        subtitle_1: values.subtitle_1.trim()
-          ? mergeLocalizedTextPayload(
-              section?.subtitle_1,
-              values.subtitle_1.trim(),
-              lang
-            )
-          : undefined,
-        subtitle_2: values.subtitle_2.trim()
-          ? mergeLocalizedTextPayload(
-              section?.subtitle_2,
-              values.subtitle_2.trim(),
-              lang
-            )
-          : undefined,
+        title: values.title,
+        subtitle_1: values.subtitle_1,
+        subtitle_2: values.subtitle_2,
         for: values.for as SectionContentType,
         orderIndex: values.orderIndex,
         isActive: Boolean(values.isActive),
